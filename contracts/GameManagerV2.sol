@@ -30,14 +30,14 @@ contract GameManagerV2 {
         );
 
         pct = 5; //0.5%
-        odds = joyGotchi.getPetAttackWinrate(fromId);
+        odds = joyGotchi.getPetAttackPoints(fromId);
         canAttack = true; //can attack
     }
 
-    function onBuyAccessory(
-        uint256 fromId,
-        uint256 itemId
-    ) external view returns (bool shouldContinue) {
-        return true;
-    }
+    // function onBuyAccessory(
+    //     uint256 fromId,
+    //     uint256 itemId
+    // ) external view returns (bool shouldContinue) {
+    //     return true;
+    // }
 }

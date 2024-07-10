@@ -32,7 +32,7 @@ interface IToken {
     function burnFrom(address account, uint256 amount) external;
 }
 
-interface FeeSharingNFT{
+interface FeeSharingNFT {
     function register(address _recipient) external returns (uint256);
 }
 
@@ -182,7 +182,6 @@ contract JoyGotchi is Owned, ERC721 {
 
         // recalculate time until starving
         timeUntilStarving[nftId] = block.timestamp + itemTimeExtension[itemId];
-
 
         if (petScore[nftId] > 0) {
             ethOwed[nftId] = pendingEth(nftId);
@@ -451,7 +450,6 @@ contract JoyGotchi is Owned, ERC721 {
         return metadata;
     }
 
-
     // calculate level based on points
     function level(uint256 tokenId) public view returns (uint256) {
         // This is the formula L(x) = 2 * sqrt(x * 2)
@@ -599,7 +597,7 @@ contract JoyGotchi is Owned, ERC721 {
             keccak256(
                 abi.encodePacked(
                     seed,
-                    block.difficulty,
+                    block.prevrandao,
                     block.timestamp,
                     msg.sender
                 )
@@ -636,7 +634,9 @@ contract JoyGotchi is Owned, ERC721 {
         ethAccPerShare += msg.value.mulDivDown(PRECISION, totalScores);
     }
 
-    function registerFeeSharing(IModeFeeSharing feeSharing) external onlyOwner() returns (uint256) {
+    function registerFeeSharing(
+        IModeFeeSharing feeSharing
+    ) external onlyOwner returns (uint256) {
         return feeSharing.register(owner);
     }
 }

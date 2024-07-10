@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
+import "../PetStatus.sol";
+
 interface IJoyGotchi {
+    function ownerOf(uint256 tokenId) external view returns (address);
+
+    function getApproved(uint256 tokenId) external view returns (address);
 
     function lastAttackUsed(uint256 id) external view returns (uint256);
 
@@ -11,5 +16,40 @@ interface IJoyGotchi {
 
     function score(uint256 id) external view returns (uint256);
 
-    function getPetAttackWinrate(uint256 _nftId) external view returns (uint256);
+    function getPetAttackPoints(uint256 _nftId) external view returns (uint256);
+
+    function isPetAlive(uint256 _nftId) external view returns (bool);
+
+    function petSex(uint256 _nftId) external view returns (uint256);
+
+    function timeUntilStarving(uint256 _nftId) external view returns (uint256);
+
+    function speciesMaxPopulation(
+        uint256 _species
+    ) external view returns (uint256);
+
+    function currentSpeciesPopulation(
+        uint256 _species
+    ) external view returns (uint256);
+
+    function getStatus(uint256 _nftId) external view returns (Status);
+
+    function checkEvolveBeforeBreed(uint256 _nftId) external;
+
+    function petSpecies(uint256 _nftId) external view returns (uint256);
+
+    function petEvolutionPhase(uint256 _nftId) external view returns (uint256);
+
+    function speciesMaxEvolutionPhase(
+        uint256 _species
+    ) external view returns (uint256);
+
+    function mintPrice() external view returns (uint256);
+
+    function createNewPetAfterBreed(
+        uint256 _random,
+        uint256 _newPetSpecies,
+        uint256 _parent1Id,
+        uint256 _parent2Id
+    ) external;
 }
