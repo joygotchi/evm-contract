@@ -6,9 +6,10 @@ import {ERC721} from "solmate/src/tokens/ERC721.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
+import "./JoyGotchiEnum.sol";
 
 contract JoyGotchiItems is ERC721, Ownable {
-    enum ItemType {
+    enum ItemRarity {
         Common,
         Rare,
         Legendary,
@@ -20,47 +21,43 @@ contract JoyGotchiItems is ERC721, Ownable {
     // Item properties
     uint256 public totalItems;
     mapping(uint256 => string) itemImage;
-    mapping(uint256 => bool) isAccessoryItem;
-    mapping(uint256 => bool) isStakeItem;
-    mapping(uint256 => bool) isBreedItem;
-    mapping(uint256 => bool) isArcadeItem;
-    mapping(uint256 => uint256) reduceBreedTimePercent;
-    mapping(uint256 => uint256) reduceBreedFeePercent;
-    mapping(uint256 => uint256) breedSuccessRate;
+    mapping(uint256 => ItemType) itemType;
+    mapping(uint256 => uint256) cooldownBreedTime;
+    mapping(uint256 => uint256) reduceBreedFee;
     mapping(uint256 => uint256) itemSpawnRate;
     mapping(uint256 => uint256) itemPoints;
-    mapping(uint256 => uint256) typeItem;
-    mapping(uint256 => bool) burnAfterUsed;
-    mapping(uint256 => uint256) timePerClaim;
+    mapping(uint256 => ItemRarity) itemRarity;
 
     // Prototype Item
-    uint256 totalPrototypeItems;
-    mapping(uint256 => uint256) public itemTypeAmount;
-    mapping(uint256 => uint256[]) listPrototypeItemsOfType;
+    uint256 public totalPrototypeItems;
+    mapping(uint256 => uint256) public itemRarityAmount;
+    mapping(uint256 => uint256[]) listPrototypeItemsOfRarity;
     mapping(uint256 => string) prototypeItemImage;
-    mapping(uint256 => bool) isAccessoryPrototypeItem;
-    mapping(uint256 => bool) isStakePrototypeItem;
-    mapping(uint256 => bool) isBreedPrototypeItem;
-    mapping(uint256 => bool) isArcadePrototypeItem;
-    mapping(uint256 => uint256) prototypeItemReduceBreedTimePercent;
-    mapping(uint256 => uint256) prototypeItemReduceBreedFeePercent;
-    mapping(uint256 => uint256) prototypeItemBreedSuccessRate;
+    mapping(uint256 => ItemType) prototypeItemType;
+    mapping(uint256 => uint256) prototypeItemCooldownBreedTime;
+    mapping(uint256 => uint256) prototypeItemReduceBreedFee;
     mapping(uint256 => uint256) prototypeItemSpawnRate;
     mapping(uint256 => uint256) prototypeItemPoints;
-    mapping(uint256 => uint256) typePrototypeItem;
-    mapping(uint256 => bool) burnAfterUsedPrototypeItem;
-    mapping(uint256 => uint256) timePerClaimPrototypeItem;
+    mapping(uint256 => ItemRarity) prototypeItemRarity;
 
     // Item chance
-    uint256 public constant MAX_CHANCE = 1000;
-    uint256 public epicDropRate = 50;
-    uint256 public legendaryDropRate = 100;
-    uint256 public rareDropRate = 200;
-    uint256 public commonDropRate = 1000;
+    uint256 public constant MAX_CHANCE = 100;
+    uint256 public epicDropRate = 5;
+    uint256 public legendaryDropRate = 10;
+    uint256 public rareDropRate = 20;
+    uint256 public commonDropRate = 100;
 
     mapping(uint256 => bool) isItemLock;
 
-    event ItemCreated(uint256 indexed prototypeId, address indexed owner);
+    event PrototypeItemCreated(
+        uint256 indexed prototypeId,
+        address indexed owner
+    );
+    event ItemMinted(
+        uint256 indexed tokenId,
+        address indexed owner,
+        uint256 indexed prototypeId
+    );
 
     constructor() ERC721("Joy Gotchi Items", "JGCItems") {}
 
@@ -75,97 +72,64 @@ contract JoyGotchiItems is ERC721, Ownable {
         public
         view
         returns (
-            uint256 _reduceBreedTimePercent,
-            uint256 _reduceBreedFeePercent,
-            uint256 _breedSuccessRate,
+            ItemType _itemType,
+            uint256 _cooldownBreedTime,
+            uint256 _reduceBreedFee,
             uint256 _itemSpawnRate,
             uint256 _itemPoints,
-            uint256 _typeItem,
-            bool _burnAfterUsed,
-            uint256 _timePerClaim
+            ItemRarity _itemRarity
         )
     {
-        _reduceBreedFeePercent = reduceBreedFeePercent[_id];
-        _reduceBreedTimePercent = reduceBreedTimePercent[_id];
-        _breedSuccessRate = breedSuccessRate[_id];
+        _itemType = itemType[_id];
+        _reduceBreedFee = reduceBreedFee[_id];
+        _cooldownBreedTime = cooldownBreedTime[_id];
         _itemSpawnRate = itemSpawnRate[_id];
         _itemPoints = itemPoints[_id];
-        _typeItem = typeItem[_id];
-        _burnAfterUsed = burnAfterUsed[_id];
-        _timePerClaim = timePerClaim[_id];
+        _itemRarity = itemRarity[_id];
     }
 
     function getItemImage(uint256 _id) public view returns (string memory) {
         return itemImage[_id];
     }
 
-    function getItemFunctionType(
-        uint256 _id
-    ) public view returns (bool, bool, bool, bool) {
-        return (
-            isAccessoryItem[_id],
-            isStakeItem[_id],
-            isBreedItem[_id],
-            isArcadeItem[_id]
-        );
-    }
-
     function mint(address _to, uint256 _prototypeItemId) public isValid {
         require(_prototypeItemId < totalPrototypeItems, "Invalid prototype id");
         uint256 currentTokenId = totalItems;
         itemImage[currentTokenId] = prototypeItemImage[_prototypeItemId];
-        isAccessoryItem[currentTokenId] = isAccessoryPrototypeItem[
+        itemType[currentTokenId] = itemType[_prototypeItemId];
+        reduceBreedFee[currentTokenId] = prototypeItemReduceBreedFee[
             _prototypeItemId
         ];
-        isStakeItem[currentTokenId] = isStakePrototypeItem[_prototypeItemId];
-        isBreedItem[currentTokenId] = isBreedPrototypeItem[_prototypeItemId];
-        isArcadeItem[currentTokenId] = isArcadePrototypeItem[_prototypeItemId];
-        reduceBreedTimePercent[
-            currentTokenId
-        ] = prototypeItemReduceBreedTimePercent[_prototypeItemId];
-        reduceBreedFeePercent[
-            currentTokenId
-        ] = prototypeItemReduceBreedFeePercent[_prototypeItemId];
-        breedSuccessRate[currentTokenId] = prototypeItemBreedSuccessRate[
+        cooldownBreedTime[currentTokenId] = prototypeItemCooldownBreedTime[
             _prototypeItemId
         ];
         itemSpawnRate[currentTokenId] = prototypeItemSpawnRate[
             _prototypeItemId
         ];
         itemPoints[currentTokenId] = prototypeItemPoints[_prototypeItemId];
-        typeItem[currentTokenId] = typePrototypeItem[_prototypeItemId];
-        burnAfterUsed[currentTokenId] = burnAfterUsedPrototypeItem[
-            _prototypeItemId
-        ];
-        timePerClaim[currentTokenId] = timePerClaimPrototypeItem[
-            _prototypeItemId
-        ];
+        itemRarity[currentTokenId] = prototypeItemRarity[_prototypeItemId];
         _mint(_to, totalItems);
         totalItems++;
+
+        emit ItemMinted(currentTokenId, _to, _prototypeItemId);
     }
 
     function burn(uint256 _tokenId) public isValid {
         delete itemImage[_tokenId];
-        delete isAccessoryItem[_tokenId];
-        delete isStakeItem[_tokenId];
-        delete isBreedItem[_tokenId];
-        delete isArcadeItem[_tokenId];
-        delete reduceBreedTimePercent[_tokenId];
-        delete reduceBreedFeePercent[_tokenId];
-        delete breedSuccessRate[_tokenId];
+        delete itemType[_tokenId];
+        delete cooldownBreedTime[_tokenId];
+        delete reduceBreedFee[_tokenId];
         delete itemSpawnRate[_tokenId];
         delete itemPoints[_tokenId];
-        delete typeItem[_tokenId];
-        delete burnAfterUsed[_tokenId];
-        delete timePerClaim[_tokenId];
+        delete itemRarity[_tokenId];
         _burn(_tokenId);
     }
 
-    function lockToken(uint256 _tokenId) public isValid {
+    function lockItem(uint256 _tokenId) public isValid {
         isItemLock[_tokenId] = true;
     }
 
-    function unlockToken(uint256 _tokenId) public isValid {
+    function unlockItem(uint256 _tokenId) public isValid {
         isItemLock[_tokenId] = false;
     }
 
@@ -180,71 +144,64 @@ contract JoyGotchiItems is ERC721, Ownable {
 
     function createPrototypeItem(
         string memory _prototypeItemImage,
-        bool[4] memory _itemForFunction, // 0 - isAccessory, 1 - isStake, 2 - isBreed, 3 - isArcade
-        uint256[6] memory _itemAttribute, // 0 - reduceBreedTimePercent, 1 - reduceBreedFeePercent, 2 - breedSuccessRate, 3 - itemSpawnRate, 4 - itemPoints, 5 - typeItem
-        bool _burnAfterUsedPrototypeItem,
-        uint256 _timePerClaimPrototypeItem
+        ItemRarity _prototypeItemRarity,
+        uint256 _prototypeItemCooldownBreedTime,
+        uint256 _prototypeItemReduceBreedFee,
+        uint256 _prototypeItemSpawnRate,
+        uint256 _prototypeItemPoints,
+        ItemType _prototypeItemType
     ) public onlyOwner {
-        if (_itemAttribute[5] > uint256(ItemType.Epic)) {
+        if (_prototypeItemRarity > ItemRarity.Epic) {
             revert("Invalid item type");
         }
-        if (_itemAttribute[3] > MAX_CHANCE) {
+        if (_prototypeItemSpawnRate > MAX_CHANCE) {
             revert("Invalid item spawn rate");
         }
         uint256 currentPrototypeId = totalPrototypeItems;
         prototypeItemImage[currentPrototypeId] = _prototypeItemImage;
-        isAccessoryPrototypeItem[currentPrototypeId] = _itemForFunction[0];
-        isStakePrototypeItem[currentPrototypeId] = _itemForFunction[1];
-        isBreedPrototypeItem[currentPrototypeId] = _itemForFunction[2];
-        isArcadePrototypeItem[currentPrototypeId] = _itemForFunction[3];
-        prototypeItemReduceBreedTimePercent[
+        prototypeItemRarity[currentPrototypeId] = _prototypeItemRarity;
+        prototypeItemCooldownBreedTime[
             currentPrototypeId
-        ] = _itemAttribute[0];
-        prototypeItemReduceBreedFeePercent[currentPrototypeId] = _itemAttribute[
-            1
-        ];
-        prototypeItemBreedSuccessRate[currentPrototypeId] = _itemAttribute[2];
-        prototypeItemSpawnRate[currentPrototypeId] = _itemAttribute[3];
-        prototypeItemPoints[currentPrototypeId] = _itemAttribute[4];
-        typePrototypeItem[currentPrototypeId] = _itemAttribute[5];
-        burnAfterUsedPrototypeItem[
+        ] = _prototypeItemCooldownBreedTime;
+        prototypeItemReduceBreedFee[
             currentPrototypeId
-        ] = _burnAfterUsedPrototypeItem;
-        timePerClaimPrototypeItem[
-            currentPrototypeId
-        ] = _timePerClaimPrototypeItem;
+        ] = _prototypeItemReduceBreedFee;
+        prototypeItemSpawnRate[currentPrototypeId] = _prototypeItemSpawnRate;
+        prototypeItemPoints[currentPrototypeId] = _prototypeItemPoints;
+        prototypeItemType[currentPrototypeId] = _prototypeItemType;
 
-        itemTypeAmount[_itemAttribute[5]]++;
-        listPrototypeItemsOfType[_itemAttribute[5]].push(currentPrototypeId);
+        itemRarityAmount[uint256(_prototypeItemRarity)]++;
+        listPrototypeItemsOfRarity[uint256(_prototypeItemRarity)].push(
+            currentPrototypeId
+        );
         totalPrototypeItems++;
-        emit ItemCreated(currentPrototypeId, msg.sender);
+        emit PrototypeItemCreated(currentPrototypeId, msg.sender);
     }
 
     // Can edit attribute but can't change type of item
     function editItems(
         uint256 _prototypeId,
         string memory _prototypeItemImage,
-        bool[4] memory _itemForFunction, // 0 - isAccessory, 1 - isStake, 2 - isBreed, 3 - isArcade
-        uint256[5] memory _itemAttribute, // 0 - reduceBreedTimePercent, 1 - reduceBreedFeePercent, 2 - breedSuccessRate, 3 - itemSpawnRate, 4 - itemPoints
-        bool _burnAfterUsedPrototypeItem,
-        uint256 _timePerClaimPrototypeItem
+        ItemRarity _prototypeItemRarity,
+        uint256 _prototypeItemCooldownBreedTime,
+        uint256 _prototypeItemReduceBreedFee,
+        uint256 _prototypeItemSpawnRate,
+        uint256 _prototypeItemPoints
     ) public onlyOwner {
         require(_prototypeId < totalPrototypeItems, "Invalid prototype id");
-        if (_itemAttribute[3] > MAX_CHANCE) {
+        if (_prototypeItemSpawnRate > MAX_CHANCE) {
             revert("Invalid item spawn rate");
         }
         prototypeItemImage[_prototypeId] = _prototypeItemImage;
-        isAccessoryPrototypeItem[_prototypeId] = _itemForFunction[0];
-        isStakePrototypeItem[_prototypeId] = _itemForFunction[1];
-        isBreedPrototypeItem[_prototypeId] = _itemForFunction[2];
-        isArcadePrototypeItem[_prototypeId] = _itemForFunction[3];
-        prototypeItemReduceBreedTimePercent[_prototypeId] = _itemAttribute[0];
-        prototypeItemReduceBreedFeePercent[_prototypeId] = _itemAttribute[1];
-        prototypeItemBreedSuccessRate[_prototypeId] = _itemAttribute[2];
-        prototypeItemSpawnRate[_prototypeId] = _itemAttribute[3];
-        prototypeItemPoints[_prototypeId] = _itemAttribute[4];
-        burnAfterUsedPrototypeItem[_prototypeId] = _burnAfterUsedPrototypeItem;
-        timePerClaimPrototypeItem[_prototypeId] = _timePerClaimPrototypeItem;
+        prototypeItemRarity[_prototypeId] = _prototypeItemRarity;
+        prototypeItemCooldownBreedTime[
+            _prototypeId
+        ] = _prototypeItemCooldownBreedTime;
+        prototypeItemReduceBreedFee[
+            _prototypeId
+        ] = _prototypeItemReduceBreedFee;
+        prototypeItemSpawnRate[_prototypeId] = _prototypeItemSpawnRate;
+        prototypeItemPoints[_prototypeId] = _prototypeItemPoints;
     }
 
     function getPrototypeForNewItem(
@@ -265,21 +222,21 @@ contract JoyGotchiItems is ERC721, Ownable {
         );
         uint256 randomChance = random % (MAX_CHANCE + 1);
         if (randomChance < epicDropRate + additionalItemSpawnRate) {
-            prototypeItemId = listPrototypeItemsOfType[uint256(ItemType.Epic)][
-                random % itemTypeAmount[uint256(ItemType.Epic)]
-            ];
+            prototypeItemId = listPrototypeItemsOfRarity[
+                uint256(ItemRarity.Epic)
+            ][random % itemRarityAmount[uint256(ItemRarity.Epic)]];
         } else if (randomChance < legendaryDropRate + additionalItemSpawnRate) {
-            prototypeItemId = listPrototypeItemsOfType[
-                uint256(ItemType.Legendary)
-            ][random % itemTypeAmount[uint256(ItemType.Legendary)]];
+            prototypeItemId = listPrototypeItemsOfRarity[
+                uint256(ItemRarity.Legendary)
+            ][random % itemRarityAmount[uint256(ItemRarity.Legendary)]];
         } else if (randomChance < rareDropRate + additionalItemSpawnRate) {
-            prototypeItemId = listPrototypeItemsOfType[uint256(ItemType.Rare)][
-                random % itemTypeAmount[uint256(ItemType.Rare)]
-            ];
+            prototypeItemId = listPrototypeItemsOfRarity[
+                uint256(ItemRarity.Rare)
+            ][random % itemRarityAmount[uint256(ItemRarity.Rare)]];
         } else {
-            prototypeItemId = listPrototypeItemsOfType[
-                uint256(ItemType.Common)
-            ][random % itemTypeAmount[uint256(ItemType.Common)]];
+            prototypeItemId = listPrototypeItemsOfRarity[
+                uint256(ItemRarity.Common)
+            ][random % itemRarityAmount[uint256(ItemRarity.Common)]];
         }
     }
 
@@ -314,33 +271,20 @@ contract JoyGotchiItems is ERC721, Ownable {
     ) internal view returns (string memory) {
         bytes memory dataURI = bytes.concat(
             abi.encodePacked(
-                '{"trait_type": "isAccessoryItem","value":"',
-                isAccessoryItem[id] ? "true" : "false",
-                '"},{"trait_type": "isStakeItem[id]","value":"',
-                isStakeItem[id] ? "true" : "false",
-                '"},{"trait_type": "isBreedItem","value":"',
-                isBreedItem[id] ? "true" : "false",
-                '"},{"trait_type": "isArcadeItem","value":"',
-                isArcadeItem[id] ? "true" : "false",
-                '"},{"trait_type": "reduceBreedTimePercent","value":"',
-                '"},{"trait_type": "reduceBreedTimePercent","value":"',
-                _uint2str(reduceBreedTimePercent[id]),
-                '"},{"trait_type": "reduceBreedFeePercent","value":"',
-                _uint2str(reduceBreedFeePercent[id])
+                '{"trait_type": "itemType","value":"',
+                _uint2str(uint256(itemType[id])),
+                '"},{"trait_type": "cooldownBreedTime","value":"',
+                _uint2str(cooldownBreedTime[id]),
+                '"},{"trait_type": "reduceBreedFee","value":"',
+                _uint2str(reduceBreedFee[id])
             ),
             abi.encodePacked(
-                '"},{"trait_type": "breedSuccessRate","value":"',
-                _uint2str(breedSuccessRate[id]),
                 '"},{"trait_type": "itemSpawnRate","value":"',
                 _uint2str(itemSpawnRate[id]),
                 '"},{"trait_type": "itemPoints","value":"',
                 _uint2str(itemPoints[id]),
-                '"},{"trait_type": "typeItem","value":"',
-                _uint2str(uint256(typeItem[id])),
-                '"},{"trait_type": "burnAfterUsed","value":"',
-                burnAfterUsed[id] ? "true" : "false",
-                '"},{"trait_type": "timePerClaim","value":"',
-                _uint2str(timePerClaim[id]),
+                '"},{"trait_type": "itemRarity","value":"',
+                _uint2str(uint256(itemRarity[id])),
                 '"}'
             )
         );

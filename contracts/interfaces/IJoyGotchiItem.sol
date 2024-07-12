@@ -1,18 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
+import "../JoyGotchiEnum.sol";
+
 interface IJoyGotchiItem {
-    function isAccessoryItem(uint256 id) external view returns (bool);
+    function itemType(uint256 id) external view returns (ItemType);
 
-    function isStakeItem(uint256 id) external view returns (bool);
+    function cooldownBreedTime(uint256 id) external view returns (uint256);
 
-    function isBreedItem(uint256 id) external view returns (bool);
-
-    function isArcadeItem(uint256 id) external view returns (bool);
-
-    function reduceBreedTimePercent(uint256 id) external view returns (uint256);
-
-    function reduceBreedFeePercent(uint256 id) external view returns (uint256);
+    function reduceBreedFee(uint256 id) external view returns (uint256);
 
     function breedSuccessRate(uint256 id) external view returns (uint256);
 
@@ -30,9 +26,9 @@ interface IJoyGotchiItem {
 
     function burn(uint256 _tokenId) external;
 
-    function lockToken(uint256 _tokenId) external;
+    function lockItem(uint256 _tokenId) external;
 
-    function unlockToken(uint256 _tokenId) external;
+    function unlockItem(uint256 _tokenId) external;
 
     function getPrototypeForNewItem(
         address _account,
@@ -43,4 +39,6 @@ interface IJoyGotchiItem {
     function ownerOf(uint256 tokenId) external view returns (address);
 
     function getApproved(uint256 tokenId) external view returns (address);
+
+    function totalPrototypeItems() external view returns (uint256);
 }

@@ -1,6 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("@nomicfoundation/hardhat-ethers");
 require("@nomicfoundation/hardhat-verify");
+require("hardhat-contract-sizer");
 require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
@@ -101,4 +102,9 @@ module.exports = {
             },
         ],
     },
+    contractSizer: {
+        alphaSort: true,
+        runOnCompile: true,
+        disambiguatePaths: false,
+      },
 };

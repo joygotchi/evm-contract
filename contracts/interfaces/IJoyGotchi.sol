@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "../PetStatus.sol";
+import "../JoyGotchiEnum.sol";
 
 interface IJoyGotchi {
     function ownerOf(uint256 tokenId) external view returns (address);
@@ -32,7 +32,7 @@ interface IJoyGotchi {
         uint256 _species
     ) external view returns (uint256);
 
-    function getStatus(uint256 _nftId) external view returns (Status);
+    function getStatus(uint256 _nftId) external view returns (PetStatus);
 
     function checkEvolveBeforeBreed(uint256 _nftId) external;
 
@@ -52,4 +52,10 @@ interface IJoyGotchi {
         uint256 _parent1Id,
         uint256 _parent2Id
     ) external;
+
+    function lockPet(uint256 _nftId) external;
+    function unlockPet(uint256 _nftId) external;
+    function isPetLocked(uint256 _nftId) external view returns (bool);
+
+    function addPetScoreAfterUsedItem(uint256 _nftId, uint256 _score) external;
 }

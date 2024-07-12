@@ -1,10 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-enum Status {
+enum PetStatus {
     HAPPY,
     HUNGRY,
     STARVING,
     DYING,
     DEAD
+}
+
+enum ItemType {
+    ACCESSORY,
+    BREED,
+    ARCADE,
+    MINETOOL,
+    WEAPON
 }
