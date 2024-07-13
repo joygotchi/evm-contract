@@ -14,9 +14,15 @@ interface IJoyGotchi {
 
     function level(uint256 id) external view returns (uint256);
 
-    function score(uint256 id) external view returns (uint256);
+    function petScore(uint256 id) external view returns (uint256);
+
+    function petRewardDebt(uint256 id) external view returns (uint256);
 
     function getPetAttackPoints(uint256 _nftId) external view returns (uint256);
+
+    function getPetDefensePoints(
+        uint256 _nftId
+    ) external view returns (uint256);
 
     function isPetAlive(uint256 _nftId) external view returns (bool);
 
@@ -34,7 +40,7 @@ interface IJoyGotchi {
 
     function getStatus(uint256 _nftId) external view returns (PetStatus);
 
-    function checkEvolveBeforeBreed(uint256 _nftId) external;
+    function checkPetEvoleAndUpdateIfNeeded(uint256 _nftId) external;
 
     function petSpecies(uint256 _nftId) external view returns (uint256);
 
@@ -58,4 +64,17 @@ interface IJoyGotchi {
     function isPetLocked(uint256 _nftId) external view returns (bool);
 
     function addPetScoreAfterUsedItem(uint256 _nftId, uint256 _score) external;
+
+    function getWalletSeedAndUpdateIfNeeded() external returns (uint256);
+
+    function petShield(uint256 _nftId) external view returns (uint256);
+
+    function reducePetShield(uint256 _nftId) external;
+
+    function setPetInfoAfterAttack(
+        uint256 loserId,
+        uint256 winnerId,
+        uint256 _score,
+        uint256 _rewardDebt
+    ) external;
 }

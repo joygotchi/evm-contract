@@ -8,12 +8,13 @@ import "./interfaces/IToken.sol";
 import "./JoyGotchiEnum.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract JoyGotchiStaking is Ownable {
+contract JoyGotchiStakingAndMining is Ownable {
     IJoyGotchi public joyGotchiNFT;
     IJoyGotchiItem public joyGotchiNFTItem;
     IToken public token;
     address public treasury;
 
+    // Staking pool info
     struct PoolInfo {
         string name;
         uint256[] rewardNFTIds;
@@ -33,6 +34,22 @@ contract JoyGotchiStaking is Ownable {
     mapping(address => mapping(uint256 => uint256)) public userStakedPetCount;
     mapping(uint256 => address) public stakedPetOwner;
 
+    // Mining pool
+    string public miningPoolName;
+    uint256 public miningPowerMultiplier;
+    uint256 public chargeOfTimeMultiplier;
+    uint256 public pointsUsedPerRedemn;
+    uint256 public tokenEarnedPerRedemn;
+    mapping(address => uint256) public miningPoints;
+    mapping(uint256 => address) public miningToolOwner;
+    mapping(address => uint256) public totalMiningPower;
+    mapping(address => uint256) public totalMiningChargeTime;
+    mapping(address => uint256) public lastMiningTime;
+    mapping(address => uint256[]) public miningToolUsed;
+
+    uint256 public constant MAX_MINING_TOOL = 3;
+    uint256 public constant BASE_DENOMINAOR = 1000;
+
     event StakingPoolCreated(
         uint256 poolId,
         string name,
@@ -50,6 +67,14 @@ contract JoyGotchiStaking is Ownable {
         uint256[] rewardItems,
         uint256 rewardToken
     );
+
+    event MiningToolAdded(uint256 toolId, address owner);
+
+    event MiningToolRemoved(uint256 toolId, address owner);
+
+    event Mined(address owner, uint256 pointsEarned);
+
+    event PointsRedemed(address owner, uint256 prototypeTokenIds);
 
     constructor(
         address _joyGotchiNFT,
@@ -203,6 +228,170 @@ contract JoyGotchiStaking is Ownable {
         );
     }
 
+    function addMiningTool(uint256 _toolId) public {
+        require(
+            joyGotchiNFTItem.itemType(_toolId) == ItemType.MINETOOL,
+            "This item is not a mining tool"
+        );
+
+        require(
+            miningToolUsed[msg.sender].length < MAX_MINING_TOOL,
+            "You have reached the maximum mining tool"
+        );
+
+        require(
+            joyGotchiNFTItem.ownerOf(_toolId) == msg.sender,
+            "You are not the owner of this tool"
+        );
+
+        require(
+            miningToolOwner[_toolId] == address(0),
+            "Mining tool is already used"
+        );
+
+        require(
+            joyGotchiNFTItem.isItemLock(_toolId) == false,
+            "This tool is locked"
+        );
+
+        joyGotchiNFTItem.lockItem(_toolId);
+
+        uint256 miningPower = joyGotchiNFTItem.miningPower(_toolId);
+        uint256 newToolChargeTime = joyGotchiNFTItem.miningChargeTime(_toolId);
+
+        miningToolUsed[msg.sender].push(_toolId);
+
+        if (miningToolUsed[msg.sender].length == 2) {
+            uint256 firstToolChargeTime = joyGotchiNFTItem.miningChargeTime(
+                miningToolUsed[msg.sender][0]
+            );
+
+            uint256 shorterChargeTimeToolId = firstToolChargeTime <
+                newToolChargeTime
+                ? miningToolUsed[msg.sender][0]
+                : _toolId;
+            uint256 reducedChargeTime = joyGotchiNFTItem.miningChargeTime(
+                shorterChargeTimeToolId
+            ) / 2;
+
+            totalMiningChargeTime[msg.sender] =
+                totalMiningChargeTime[msg.sender] -
+                reducedChargeTime +
+                newToolChargeTime;
+        } else if (miningToolUsed[msg.sender].length == 3) {
+            uint256 firstToolChargeTime = joyGotchiNFTItem.miningChargeTime(
+                miningToolUsed[msg.sender][0]
+            );
+            uint256 secondToolChargeTime = joyGotchiNFTItem.miningChargeTime(
+                miningToolUsed[msg.sender][1]
+            );
+
+            uint256 shorterChargeTimeToolId = firstToolChargeTime <
+                secondToolChargeTime
+                ? miningToolUsed[msg.sender][0]
+                : miningToolUsed[msg.sender][1];
+            uint256 shortestChargeTimeToolId = joyGotchiNFTItem
+                .miningChargeTime(shorterChargeTimeToolId) < newToolChargeTime
+                ? shorterChargeTimeToolId
+                : _toolId;
+
+            uint256 reducedChargeTime = joyGotchiNFTItem.miningChargeTime(
+                shortestChargeTimeToolId
+            );
+
+            totalMiningChargeTime[msg.sender] =
+                totalMiningChargeTime[msg.sender] -
+                reducedChargeTime +
+                newToolChargeTime;
+        } else {
+            totalMiningChargeTime[msg.sender] += joyGotchiNFTItem
+                .miningChargeTime(_toolId);
+        }
+
+        totalMiningPower[msg.sender] += miningPower;
+        miningToolOwner[_toolId] = msg.sender;
+
+        if (lastMiningTime[msg.sender] == 0) {
+            lastMiningTime[msg.sender] = block.timestamp;
+        }
+
+        emit MiningToolAdded(_toolId, msg.sender);
+    }
+
+    function removeMiningTool(uint256 _toolId) public {
+        require(
+            miningToolOwner[_toolId] == msg.sender,
+            "You are not the owner of this tool"
+        );
+
+        joyGotchiNFTItem.unlockItem(_toolId);
+
+        uint256 miningPower = joyGotchiNFTItem.miningPower(_toolId);
+
+        uint256 chargeOfTime = joyGotchiNFTItem.miningChargeTime(_toolId);
+
+        totalMiningPower[msg.sender] -= miningPower;
+
+        if (totalMiningChargeTime[msg.sender] < chargeOfTime) {
+            totalMiningChargeTime[msg.sender] = 0;
+        } else {
+            totalMiningChargeTime[msg.sender] -= chargeOfTime;
+        }
+
+        miningToolOwner[_toolId] = address(0);
+
+        _removeItemFromListTool(_toolId);
+
+        emit MiningToolRemoved(_toolId, msg.sender);
+    }
+
+    function mining() public {
+        require(
+            totalMiningPower[msg.sender] > 0,
+            "You do not have any mining tool"
+        );
+
+        uint256 totalMiningChargeOfTime = (chargeOfTimeMultiplier *
+            totalMiningPower[msg.sender]) / BASE_DENOMINAOR;
+
+        require(
+            lastMiningTime[msg.sender] + totalMiningChargeOfTime >
+                block.timestamp,
+            "You need to wait for the mining tool to be charged"
+        );
+
+        lastMiningTime[msg.sender] = block.timestamp;
+
+        uint256 totalPointsMined = miningPowerMultiplier *
+            totalMiningPower[msg.sender];
+
+        miningPoints[msg.sender] += totalPointsMined;
+
+        emit Mined(msg.sender, totalPointsMined);
+    }
+
+    function redemnMiningPoints() public {
+        uint256 _miningPoints = miningPoints[msg.sender];
+
+        require(
+            _miningPoints >= pointsUsedPerRedemn,
+            "You do not have enough mining point"
+        );
+
+        miningPoints[msg.sender] -= pointsUsedPerRedemn;
+
+        uint256 prototypeTokenId = joyGotchiNFTItem.getPrototypeForNewItem(
+            msg.sender,
+            _miningPoints
+        );
+
+        joyGotchiNFTItem.mint(msg.sender, prototypeTokenId);
+
+        token.transfer(msg.sender, tokenEarnedPerRedemn);
+
+        emit PointsRedemed(msg.sender, prototypeTokenId);
+    }
+
     function ownerWithdrawRedundantToken(uint256 _poolId) public onlyOwner {
         PoolInfo memory pool = poolInfo[_poolId];
 
@@ -221,15 +410,38 @@ contract JoyGotchiStaking is Ownable {
         token.transfer(msg.sender, redundantToken);
     }
 
+    function configureMiningPool(
+        string memory _name,
+        uint256 _miningPowerMultiplier,
+        uint256 _chargeOfTimeMultiplier
+    ) public onlyOwner {
+        miningPoolName = _name;
+        miningPowerMultiplier = _miningPowerMultiplier;
+        chargeOfTimeMultiplier = _chargeOfTimeMultiplier;
+    }
+
+    function setMiningPointsUsedPerRedemn(uint256 _points) public onlyOwner {
+        pointsUsedPerRedemn = _points;
+    }
+
+    function setTokenEarnedPerRedemn(uint256 _token) public onlyOwner {
+        tokenEarnedPerRedemn = _token;
+    }
+
     function setPricePerSlot(uint256 _pricePerSlot) public onlyOwner {
         pricePerSlot = _pricePerSlot;
     }
 
-    function convertSecondsToHours(
-        uint256 _seconds
-    ) public pure returns (uint256) {
-        // There are 3600 seconds in one hour
-        uint256 _hours = _seconds / 3600;
-        return _hours;
+    function _removeItemFromListTool(uint256 _value) private {
+        uint256[] memory userListMiningTool = miningToolUsed[msg.sender];
+        for (uint256 i = 0; i < userListMiningTool.length; i++) {
+            if (userListMiningTool[i] == _value) {
+                miningToolUsed[msg.sender][i] = userListMiningTool[
+                    userListMiningTool.length - 1
+                ];
+                miningToolUsed[msg.sender].pop();
+                break;
+            }
+        }
     }
 }

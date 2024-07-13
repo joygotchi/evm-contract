@@ -102,8 +102,8 @@ contract JoyGotchiBreed {
             "Pet 2 breed count exceed"
         );
 
-        joyGotchiNFT.checkEvolveBeforeBreed(_nftId);
-        joyGotchiNFT.checkEvolveBeforeBreed(_nftId2);
+        joyGotchiNFT.checkPetEvoleAndUpdateIfNeeded(_nftId);
+        joyGotchiNFT.checkPetEvoleAndUpdateIfNeeded(_nftId2);
 
         require(
             joyGotchiNFT.petEvolutionPhase(_nftId) ==
@@ -140,6 +140,11 @@ contract JoyGotchiBreed {
         isApprovedJoyGotchiNFT(_nftId2)
         isApprovedJoyGotchiNFTItem(_itemId)
     {
+        require(
+            joyGotchiNFTItem.ownerOf(_itemId) == msg.sender,
+            "Not your item"
+        );
+
         uint256 species1 = joyGotchiNFT.petSpecies(_nftId);
         uint256 species2 = joyGotchiNFT.petSpecies(_nftId2);
 

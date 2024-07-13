@@ -63,8 +63,6 @@ contract JoyGotchiV2 is QRNG, ERC721 {
     mapping(uint256 => uint256) public timeUntilStarving;
     mapping(uint256 => uint256) public petScore;
     mapping(uint256 => uint256) public timePetBorn;
-    mapping(uint256 => uint256) public lastAttackUsed;
-    mapping(uint256 => uint256) public lastAttacked;
     mapping(uint256 => uint256) public petSpecies;
     mapping(uint256 => uint256) public petSex;
     mapping(uint256 => uint256) public petSkinColor;
@@ -102,6 +100,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
 
     address public breedContract;
     address public stakingAndMiningContract;
+    address public attackContract;
     address public treasury;
     IGenePool public genePool;
 
@@ -117,12 +116,10 @@ contract JoyGotchiV2 is QRNG, ERC721 {
 
     event ItemConsumed(uint256 nftId, address giver, uint256 itemId);
     event PetKilled(
-        uint256 nftId,
         uint256 deadId,
         string loserName,
         uint256 reward,
-        address killer,
-        string winnerName
+        address killer
     );
     event ImidiateUseItemCreated(
         uint256 id,
@@ -135,14 +132,6 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         uint256 itemDefenseBoost,
         bool isRevival
     );
-    event Attack(
-        uint256 attacker,
-        uint256 winner,
-        uint256 loser,
-        uint256 scoresWon
-    );
-
-    event AttackBlocked(uint256 fromId, uint256 toId);
 
     event RedeemRewards(uint256 indexed petId, uint256 reward);
 
@@ -176,20 +165,11 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         _;
     }
 
-    modifier onlyBreedContract() {
-        require(msg.sender == breedContract, "Unauthorized");
-        _;
-    }
-
-    modifier onlyStakingAndMiningContract() {
-        require(msg.sender == stakingAndMiningContract, "Unauthorized");
-        _;
-    }
-
     modifier isAuthorized() {
         require(
             msg.sender == breedContract ||
-                msg.sender == stakingAndMiningContract,
+                msg.sender == stakingAndMiningContract ||
+                msg.sender == attackContract,
             "Not authorized"
         );
         _;
@@ -271,76 +251,22 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         emit ItemConsumed(nftId, msg.sender, itemId);
     }
 
-    function attack(uint256 fromId, uint256 toId) external isApproved(fromId) {
-        require(fromId != toId, "Can't hurt yourself");
-        require(isPetAlive(fromId), "Your pet is dead");
-        require(isPetLocked[fromId] == false, "Your pet is locked");
-        require(isPetLocked[toId] == false, "Their pet is locked");
-
-        if (petShield[toId] > 0) {
-            petShield[toId] -= 1;
-            emit AttackBlocked(fromId, toId);
-            return;
-        }
-
-        (uint256 pct, uint256 odds, bool canAttack) = onAttack(fromId, toId);
-
-        if (!canAttack) {
-            return;
-        }
-
-        lastAttackUsed[fromId] = block.timestamp;
-        lastAttacked[toId] = block.timestamp;
-
-        uint256 loser;
-        uint256 winner;
-
-        uint256 _random = random(fromId + toId) % 100;
-
-        if (_random > odds) {
-            loser = fromId;
-            winner = toId;
-        } else {
-            loser = toId;
-            winner = fromId;
-        }
-
-        uint256 feePercentage = PRECISION.mulDivDown(pct, 1000); // 0.5 pct
-        uint256 prizeScore = petScore[loser].mulDivDown(
-            feePercentage,
-            PRECISION
-        );
-
-        uint256 prizeDebt = petRewardDebt[loser].mulDivDown(
-            feePercentage,
-            PRECISION
-        );
-
-        petScore[loser] -= prizeScore;
-        petRewardDebt[loser] -= prizeDebt;
-
-        petScore[winner] += prizeScore;
-        petRewardDebt[winner] += prizeDebt;
-
-        _evolvePetIfNeeded(fromId);
-        _evolvePetIfNeeded(toId);
-
-        emit Attack(fromId, winner, loser, prizeScore);
-    }
-
     // kill and burn pets.
-    function kill(
-        uint256 _deadId,
-        uint256 _tokenId
-    ) external isApproved(_tokenId) {
+    function kill(uint256 _deadId) external {
         require(
             !isPetAlive(_deadId),
             "The pet has to be starved to claim his points"
         );
 
-        if (hasTheDiamond == _deadId) {
-            hasTheDiamond = _tokenId;
-        }
+        require(
+            ownerOf(_deadId) == msg.sender,
+            "You are not the owner of this pet"
+        );
+
+        require(
+            hasTheDiamond != _deadId,
+            "Pet has diamond, please pass it before kill"
+        );
 
         uint256 speciesOfDead = petSpecies[_deadId];
         address ownerOfDead = ownerOf(_deadId);
@@ -350,16 +276,17 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         // redeem for dead pet
         _redeem(_deadId, ownerOfDead);
         _getWalletSeedAndUpdateIfNeeded();
-        _evolvePetIfNeeded(_tokenId);
 
-        emit PetKilled(
-            _tokenId,
-            _deadId,
-            petName[_deadId],
-            1,
-            msg.sender,
-            petName[_tokenId]
-        );
+        emit PetKilled(_deadId, petName[_deadId], 1, msg.sender);
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public override {
+        require(!isPetLocked[tokenId], "Can't transfer locked pet");
+        super.transferFrom(from, to, tokenId);
     }
 
     function setPetName(
@@ -369,7 +296,9 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         petName[_id] = _name;
     }
 
-    function checkEvolveBeforeBreed(uint256 _nftId) external onlyBreedContract {
+    function checkPetEvoleAndUpdateIfNeeded(
+        uint256 _nftId
+    ) external isAuthorized {
         _evolvePetIfNeeded(_nftId);
     }
 
@@ -386,7 +315,11 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         uint256 _newPetSpecies,
         uint256 _parent1Id,
         uint256 _parent2Id
-    ) external onlyBreedContract {
+    ) external {
+        require(
+            msg.sender == breedContract,
+            "Only breed contract can create new pet"
+        );
         uint256 _newPetSkinColor = (_random + 2) % genePool.skinColorGeneNum();
         uint256 _newPetHornStyle = (_random + 3) % genePool.hornStyleGeneNum();
         uint256 _newPetWingStyle = (_random + 4) % genePool.wingStyleGeneNum();
@@ -407,6 +340,28 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         _mint(msg.sender, _tokenIds);
         _tokenIds++;
     }
+
+    function reducePetShield(uint256 _nftId) external {
+        require(msg.sender == attackContract, "Not authorized");
+        petShield[_nftId] -= 1;
+    }
+
+    function setPetInfoAfterAttack(
+        uint256 loserId,
+        uint256 winnerId,
+        uint256 _score,
+        uint256 _rewardDebt
+    ) external {
+        require(msg.sender == attackContract, "Not authorized");
+
+        petScore[loserId] -= _score;
+        petRewardDebt[loserId] -= _rewardDebt;
+
+        petScore[winnerId] += _score;
+        petRewardDebt[winnerId] += _rewardDebt;
+
+    }
+
 
     function lockPet(uint256 _nftId) external isAuthorized {
         require(isPetAlive(_nftId), "Can't lock dead pet");
@@ -543,8 +498,6 @@ contract JoyGotchiV2 is QRNG, ERC721 {
             uint256 _score,
             uint256 _level,
             uint256 _timeUntilStarving,
-            uint256 _lastAttacked,
-            uint256 _lastAttackUsed,
             address _owner,
             uint256 _rewards,
             string memory _genes
@@ -555,8 +508,6 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         _score = petScore[_nftId];
         _level = level(_nftId);
         _timeUntilStarving = timeUntilStarving[_nftId];
-        _lastAttacked = lastAttacked[_nftId];
-        _lastAttackUsed = lastAttackUsed[_nftId];
         _owner = !isPetAlive(_nftId) && _score == 0
             ? address(0x0)
             : ownerOf(_nftId);
@@ -636,30 +587,6 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         uint256 _species = petSpecies[_nftId];
         uint256 _evolutionPhase = petEvolutionPhase[_nftId];
         _image = speciesToEvolutions[_species][_evolutionPhase].image;
-    }
-
-    function onAttack(
-        uint256 fromId,
-        uint256 toId
-    ) internal view returns (uint256 pct, uint256 odds, bool canAttack) {
-        require(
-            block.timestamp >= lastAttackUsed[fromId] + 15 minutes ||
-                lastAttackUsed[fromId] == 0,
-            "You have one attack every 15 mins"
-        );
-        require(
-            block.timestamp > lastAttacked[fromId] + 1 hours,
-            "can be attacked once every hour"
-        );
-
-        require(
-            level(fromId) < level(toId),
-            "Only attack pets above your level"
-        );
-
-        pct = 5; //0.5%
-        odds = getPetAttackPoints(fromId);
-        canAttack = true; //can attack
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -775,6 +702,10 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         address _stakingAndMiningContract
     ) external onlyOwner {
         stakingAndMiningContract = _stakingAndMiningContract;
+    }
+
+    function setAttackContract(address _attackContract) external onlyOwner {
+        attackContract = _attackContract;
     }
 
     function setTreasuryAddress(address _treasury) external onlyOwner {
@@ -938,6 +869,14 @@ contract JoyGotchiV2 is QRNG, ERC721 {
             uint256 r1 = x / r;
             return uint128(r < r1 ? r : r1);
         }
+    }
+
+    function getWalletSeedAndUpdateIfNeeded()
+        external
+        isAuthorized
+        returns (uint256)
+    {
+        return _getWalletSeedAndUpdateIfNeeded();
     }
 
     function random(uint256 seed) private returns (uint) {

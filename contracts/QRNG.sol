@@ -7,13 +7,13 @@ contract QRNG is RrpRequesterV0, Ownable {
     event RandomSeedRequested(bytes32 indexed requestId, address wallet);
     event RandomSeedReceived(bytes32 indexed requestId, uint256 response);
 
-    address public airnode;                 // The address of the QRNG Airnode
-    bytes32 public endpointIdUint256;       // The endpoint ID for requesting a single random number
-    address public sponsorWallet;           // The wallet that will cover the gas costs of the request
+    address public airnode; // The address of the QRNG Airnode
+    bytes32 public endpointIdUint256; // The endpoint ID for requesting a single random number
+    address public sponsorWallet; // The wallet that will cover the gas costs of the request
 
     // wallet's random seed
     mapping(address => uint256) public walletSeed;
-    mapping(address =>uint256) public walletLastSeedUpdate;
+    mapping(address => uint256) public walletLastSeedUpdate;
     mapping(bytes32 => address) public requestIdToWallet;
     uint256 public seedUpdateInterval = 1 hours;
 
@@ -26,18 +26,23 @@ contract QRNG is RrpRequesterV0, Ownable {
         address _airnode,
         bytes32 _endpointIdUint256,
         address _sponsorWallet
-    ) external onlyOwner{
+    ) external onlyOwner {
         airnode = _airnode;
         endpointIdUint256 = _endpointIdUint256;
         sponsorWallet = _sponsorWallet;
     }
 
-    function setSeedUpdateInterval(uint256 _seedUpdateInterval) external onlyOwner {
+    function setSeedUpdateInterval(
+        uint256 _seedUpdateInterval
+    ) external onlyOwner {
         seedUpdateInterval = _seedUpdateInterval;
     }
 
     function _getWalletSeedAndUpdateIfNeeded() internal returns (uint256) {
-        if (block.timestamp - walletLastSeedUpdate[msg.sender] > seedUpdateInterval) {
+        if (
+            block.timestamp - walletLastSeedUpdate[msg.sender] >
+            seedUpdateInterval
+        ) {
             _generateRandomSeedForWallet();
             walletLastSeedUpdate[msg.sender] = block.timestamp;
         }
@@ -59,15 +64,15 @@ contract QRNG is RrpRequesterV0, Ownable {
         );
         expectingRequestWithIdToBeFulfilled[requestId] = true;
         requestIdToWallet[requestId] = msg.sender;
-        emit RandomSeedRequested(requestId,msg.sender);
+        emit RandomSeedRequested(requestId, msg.sender);
     }
 
     /// @notice Called by the Airnode through the AirnodeRrp contract to
     /// fulfill the request
-    function generateRandomSeedForWalletCallback(bytes32 requestId, bytes calldata data)
-        external
-        onlyAirnodeRrp
-    {
+    function generateRandomSeedForWalletCallback(
+        bytes32 requestId,
+        bytes calldata data
+    ) external onlyAirnodeRrp {
         require(
             expectingRequestWithIdToBeFulfilled[requestId],
             "Request ID not known"
@@ -80,9 +85,6 @@ contract QRNG is RrpRequesterV0, Ownable {
 
     /// @notice To withdraw funds from the sponsor wallet to the contract.
     function withdrawFromAirnodeSponsor() external onlyOwner {
-        airnodeRrp.requestWithdrawal(
-        airnode,
-        sponsorWallet
-        );
+        airnodeRrp.requestWithdrawal(airnode, sponsorWallet);
     }
 }

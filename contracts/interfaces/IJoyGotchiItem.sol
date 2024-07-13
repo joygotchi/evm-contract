@@ -10,17 +10,13 @@ interface IJoyGotchiItem {
 
     function reduceBreedFee(uint256 id) external view returns (uint256);
 
-    function breedSuccessRate(uint256 id) external view returns (uint256);
-
-    function itemSpawnRate(uint256 id) external view returns (uint256);
-
     function itemPoints(uint256 id) external view returns (uint256);
 
-    function typeItem(uint256 id) external view returns (uint256);
+    function itemRarity(uint256 id) external view returns (uint256);
 
-    function burnAfterUsed(uint256 id) external view returns (bool);
+    function miningPower(uint256 id) external view returns (uint256);
 
-    function timePerClaim(uint256 id) external view returns (uint256);
+    function miningChargeTime(uint256 id) external view returns (uint256);
 
     function mint(address _to, uint256 _prototypeItemId) external;
 
@@ -32,8 +28,7 @@ interface IJoyGotchiItem {
 
     function getPrototypeForNewItem(
         address _account,
-        uint seed,
-        uint256 additionalItemSpawnRate
+        uint seed
     ) external view returns (uint256);
 
     function ownerOf(uint256 tokenId) external view returns (address);
@@ -41,4 +36,6 @@ interface IJoyGotchiItem {
     function getApproved(uint256 tokenId) external view returns (address);
 
     function totalPrototypeItems() external view returns (uint256);
+
+    function isItemLock(uint256 tokenId) external view returns (bool);
 }

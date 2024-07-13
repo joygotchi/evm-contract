@@ -7,6 +7,7 @@ import {ERC721} from "solmate/src/tokens/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 import "./JoyGotchiEnum.sol";
+import "./interfaces/IJoyGotchi.sol";
 
 contract JoyGotchiItems is ERC721, Ownable {
     enum ItemRarity {
@@ -16,6 +17,8 @@ contract JoyGotchiItems is ERC721, Ownable {
         Epic
     }
 
+    IJoyGotchi public joyGotchiNFT;
+
     mapping(address => bool) _allowAddress;
 
     // Item properties
@@ -24,9 +27,10 @@ contract JoyGotchiItems is ERC721, Ownable {
     mapping(uint256 => ItemType) itemType;
     mapping(uint256 => uint256) cooldownBreedTime;
     mapping(uint256 => uint256) reduceBreedFee;
-    mapping(uint256 => uint256) itemSpawnRate;
     mapping(uint256 => uint256) itemPoints;
     mapping(uint256 => ItemRarity) itemRarity;
+    mapping(uint256 => uint256) miningPower;
+    mapping(uint256 => uint256) miningChargeTime;
 
     // Prototype Item
     uint256 public totalPrototypeItems;
@@ -36,9 +40,10 @@ contract JoyGotchiItems is ERC721, Ownable {
     mapping(uint256 => ItemType) prototypeItemType;
     mapping(uint256 => uint256) prototypeItemCooldownBreedTime;
     mapping(uint256 => uint256) prototypeItemReduceBreedFee;
-    mapping(uint256 => uint256) prototypeItemSpawnRate;
     mapping(uint256 => uint256) prototypeItemPoints;
     mapping(uint256 => ItemRarity) prototypeItemRarity;
+    mapping(uint256 => uint256) prototypeItemminingPower;
+    mapping(uint256 => uint256) prototypeItemminingChargeTime;
 
     // Item chance
     uint256 public constant MAX_CHANCE = 100;
@@ -59,7 +64,9 @@ contract JoyGotchiItems is ERC721, Ownable {
         uint256 indexed prototypeId
     );
 
-    constructor() ERC721("Joy Gotchi Items", "JGCItems") {}
+    constructor(address _joyGotchiNFT) ERC721("Joy Gotchi Items", "JGCItems") {
+        joyGotchiNFT = IJoyGotchi(_joyGotchiNFT);
+    }
 
     modifier isValid() {
         require(_allowAddress[msg.sender], "not authorize");
@@ -75,17 +82,19 @@ contract JoyGotchiItems is ERC721, Ownable {
             ItemType _itemType,
             uint256 _cooldownBreedTime,
             uint256 _reduceBreedFee,
-            uint256 _itemSpawnRate,
             uint256 _itemPoints,
-            ItemRarity _itemRarity
+            ItemRarity _itemRarity,
+            uint256 _miningPower,
+            uint256 _miningChargeTime
         )
     {
         _itemType = itemType[_id];
         _reduceBreedFee = reduceBreedFee[_id];
         _cooldownBreedTime = cooldownBreedTime[_id];
-        _itemSpawnRate = itemSpawnRate[_id];
         _itemPoints = itemPoints[_id];
         _itemRarity = itemRarity[_id];
+        _miningPower = miningPower[_id];
+        _miningChargeTime = miningChargeTime[_id];
     }
 
     function getItemImage(uint256 _id) public view returns (string memory) {
@@ -103,11 +112,14 @@ contract JoyGotchiItems is ERC721, Ownable {
         cooldownBreedTime[currentTokenId] = prototypeItemCooldownBreedTime[
             _prototypeItemId
         ];
-        itemSpawnRate[currentTokenId] = prototypeItemSpawnRate[
-            _prototypeItemId
-        ];
         itemPoints[currentTokenId] = prototypeItemPoints[_prototypeItemId];
         itemRarity[currentTokenId] = prototypeItemRarity[_prototypeItemId];
+        miningPower[currentTokenId] = prototypeItemminingPower[
+            _prototypeItemId
+        ];
+        miningChargeTime[currentTokenId] = prototypeItemminingChargeTime[
+            _prototypeItemId
+        ];
         _mint(_to, totalItems);
         totalItems++;
 
@@ -119,9 +131,10 @@ contract JoyGotchiItems is ERC721, Ownable {
         delete itemType[_tokenId];
         delete cooldownBreedTime[_tokenId];
         delete reduceBreedFee[_tokenId];
-        delete itemSpawnRate[_tokenId];
         delete itemPoints[_tokenId];
         delete itemRarity[_tokenId];
+        delete miningPower[_tokenId];
+        delete miningChargeTime[_tokenId];
         _burn(_tokenId);
     }
 
@@ -147,16 +160,15 @@ contract JoyGotchiItems is ERC721, Ownable {
         ItemRarity _prototypeItemRarity,
         uint256 _prototypeItemCooldownBreedTime,
         uint256 _prototypeItemReduceBreedFee,
-        uint256 _prototypeItemSpawnRate,
         uint256 _prototypeItemPoints,
-        ItemType _prototypeItemType
+        ItemType _prototypeItemType,
+        uint256 _prototypeItemminingPower,
+        uint256 _prototypeItemminingChargeTime
     ) public onlyOwner {
         if (_prototypeItemRarity > ItemRarity.Epic) {
             revert("Invalid item type");
         }
-        if (_prototypeItemSpawnRate > MAX_CHANCE) {
-            revert("Invalid item spawn rate");
-        }
+
         uint256 currentPrototypeId = totalPrototypeItems;
         prototypeItemImage[currentPrototypeId] = _prototypeItemImage;
         prototypeItemRarity[currentPrototypeId] = _prototypeItemRarity;
@@ -166,9 +178,14 @@ contract JoyGotchiItems is ERC721, Ownable {
         prototypeItemReduceBreedFee[
             currentPrototypeId
         ] = _prototypeItemReduceBreedFee;
-        prototypeItemSpawnRate[currentPrototypeId] = _prototypeItemSpawnRate;
         prototypeItemPoints[currentPrototypeId] = _prototypeItemPoints;
         prototypeItemType[currentPrototypeId] = _prototypeItemType;
+        prototypeItemminingPower[
+            currentPrototypeId
+        ] = _prototypeItemminingPower;
+        prototypeItemminingChargeTime[
+            currentPrototypeId
+        ] = _prototypeItemminingChargeTime;
 
         itemRarityAmount[uint256(_prototypeItemRarity)]++;
         listPrototypeItemsOfRarity[uint256(_prototypeItemRarity)].push(
@@ -185,13 +202,11 @@ contract JoyGotchiItems is ERC721, Ownable {
         ItemRarity _prototypeItemRarity,
         uint256 _prototypeItemCooldownBreedTime,
         uint256 _prototypeItemReduceBreedFee,
-        uint256 _prototypeItemSpawnRate,
-        uint256 _prototypeItemPoints
+        uint256 _prototypeItemPoints,
+        uint256 _prototypeItemminingPower,
+        uint256 _prototypeItemminingChargeTime
     ) public onlyOwner {
         require(_prototypeId < totalPrototypeItems, "Invalid prototype id");
-        if (_prototypeItemSpawnRate > MAX_CHANCE) {
-            revert("Invalid item spawn rate");
-        }
         prototypeItemImage[_prototypeId] = _prototypeItemImage;
         prototypeItemRarity[_prototypeId] = _prototypeItemRarity;
         prototypeItemCooldownBreedTime[
@@ -200,15 +215,19 @@ contract JoyGotchiItems is ERC721, Ownable {
         prototypeItemReduceBreedFee[
             _prototypeId
         ] = _prototypeItemReduceBreedFee;
-        prototypeItemSpawnRate[_prototypeId] = _prototypeItemSpawnRate;
         prototypeItemPoints[_prototypeId] = _prototypeItemPoints;
+        prototypeItemminingPower[_prototypeId] = _prototypeItemminingPower;
+        prototypeItemminingChargeTime[
+            _prototypeId
+        ] = _prototypeItemminingChargeTime;
     }
 
     function getPrototypeForNewItem(
         address _account,
-        uint seed,
-        uint256 additionalItemSpawnRate
-    ) external view isValid returns (uint256 prototypeItemId) {
+        uint seed
+    ) external isValid returns (uint256 prototypeItemId) {
+        uint256 walletSeed = joyGotchiNFT.getWalletSeedAndUpdateIfNeeded();
+
         uint256 random = uint256(
             keccak256(
                 abi.encodePacked(
@@ -216,20 +235,20 @@ contract JoyGotchiItems is ERC721, Ownable {
                     block.prevrandao,
                     _account,
                     seed,
-                    additionalItemSpawnRate
+                    walletSeed
                 )
             )
         );
         uint256 randomChance = random % (MAX_CHANCE + 1);
-        if (randomChance < epicDropRate + additionalItemSpawnRate) {
+        if (randomChance < epicDropRate) {
             prototypeItemId = listPrototypeItemsOfRarity[
                 uint256(ItemRarity.Epic)
             ][random % itemRarityAmount[uint256(ItemRarity.Epic)]];
-        } else if (randomChance < legendaryDropRate + additionalItemSpawnRate) {
+        } else if (randomChance < legendaryDropRate) {
             prototypeItemId = listPrototypeItemsOfRarity[
                 uint256(ItemRarity.Legendary)
             ][random % itemRarityAmount[uint256(ItemRarity.Legendary)]];
-        } else if (randomChance < rareDropRate + additionalItemSpawnRate) {
+        } else if (randomChance < rareDropRate) {
             prototypeItemId = listPrototypeItemsOfRarity[
                 uint256(ItemRarity.Rare)
             ][random % itemRarityAmount[uint256(ItemRarity.Rare)]];
@@ -279,12 +298,14 @@ contract JoyGotchiItems is ERC721, Ownable {
                 _uint2str(reduceBreedFee[id])
             ),
             abi.encodePacked(
-                '"},{"trait_type": "itemSpawnRate","value":"',
-                _uint2str(itemSpawnRate[id]),
                 '"},{"trait_type": "itemPoints","value":"',
                 _uint2str(itemPoints[id]),
                 '"},{"trait_type": "itemRarity","value":"',
                 _uint2str(uint256(itemRarity[id])),
+                '"},{"trait_type": "miningPower","value":"',
+                _uint2str(miningPower[id]),
+                '"},{"trait_type": "miningChargeTime","value":"',
+                _uint2str(miningChargeTime[id]),
                 '"}'
             )
         );
