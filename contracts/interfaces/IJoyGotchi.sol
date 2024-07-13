@@ -72,9 +72,8 @@ interface IJoyGotchi {
     function reducePetShield(uint256 _nftId) external;
 
     function setPetInfoAfterAttack(
-        uint256 loserId,
         uint256 winnerId,
-        uint256 _score,
-        uint256 _rewardDebt
+        uint256 loserId,
+        uint256 _score
     ) external;
 }

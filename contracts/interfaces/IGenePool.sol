@@ -11,6 +11,7 @@ interface IGenePool {
     function wingStyleGeneNum() external view returns (uint256);
     function speciesToSpawnCondition(uint256 _id) external view returns (uint256 gte, uint256 lte);
     function isSpeciesGeneInitialized(uint256 _id) external view returns (bool);
-    function addSpeciesToGenePool(uint _id, uint256 _geneNum) external returns (uint256);
+    function addSpeciesToGenePool(uint _id) external returns (uint256);
+    function removeSpeciesFromGenePool(uint _id) external;
     function generateGene(address _account, uint _nftId, uint seed) external view returns (uint256 species, uint256 sex);
 }

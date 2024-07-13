@@ -3,21 +3,15 @@ pragma solidity ^0.8.17;
 
 contract GenePool {
     address public nft;
-    uint256 public totalGeneNum;
     uint256 public speciesCount;
-    
+
     uint256 public skinColorGeneNum;
     uint256 public hornStyleGeneNum;
     uint256 public wingStyleGeneNum;
+    uint256[] public listAvailableSpecies;
 
-    struct spawnCondition{
-        uint256 gte;
-        uint256 lte;
-    }
-
-    mapping(uint256 => spawnCondition) public speciesToSpawnCondition;
     mapping(uint256 => bool) public isSpeciesGeneInitialized;
-
+    mapping(uint256 => bool) public isSpeciesGeneAvailableInGenePool;
 
     constructor(
         address _joyGotchiNFT,
@@ -36,29 +30,57 @@ contract GenePool {
         _;
     }
 
+    function addSpeciesToGenePool(uint _id) external onlyNFT returns (uint256) {
+        if (!isSpeciesGeneInitialized[_id]) {
+            isSpeciesGeneInitialized[_id] = true;
+            speciesCount++;
+        } else {
+            require(!isSpeciesGeneAvailableInGenePool[_id], "Species added");
+        }
+        isSpeciesGeneAvailableInGenePool[_id] = true;
+        listAvailableSpecies.push(_id);
 
-    function addSpeciesToGenePool(uint _id, uint256 _geneNum) external onlyNFT returns (uint256){
-        require(!isSpeciesGeneInitialized[_id], "Species already added");
-        isSpeciesGeneInitialized[_id] = true;
-        speciesToSpawnCondition[_id] = spawnCondition(totalGeneNum, totalGeneNum + _geneNum - 1);
-        totalGeneNum += _geneNum;
-        speciesCount++;
         return speciesCount;
     }
 
-    function generateGene(address _account, uint _nftId, uint seed) external view onlyNFT returns (uint256 species, uint256 sex) {
-        uint256 random = uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, _account, _nftId, seed)));
-        uint256 randomSpeciesNum = random % totalGeneNum;
-        species = 0;
-        for (uint256 i = 0; i < speciesCount; i++) {
-            if (randomSpeciesNum >= speciesToSpawnCondition[i].gte && randomSpeciesNum <= speciesToSpawnCondition[i].lte) {
-                species = i;
+    function removeSpeciesFromGenePool(uint _id) external onlyNFT {
+        require(
+            isSpeciesGeneInitialized[_id] &&
+                isSpeciesGeneAvailableInGenePool[_id],
+            "Species not added"
+        );
+        for (uint256 i = 0; i < listAvailableSpecies.length; i++) {
+            if (listAvailableSpecies[i] == _id) {
+                listAvailableSpecies[i] = listAvailableSpecies[
+                    listAvailableSpecies.length - 1
+                ];
+                listAvailableSpecies.pop();
                 break;
             }
         }
-        sex = (random) % 2;
+        isSpeciesGeneAvailableInGenePool[_id] = false;
     }
 
+    function generateGene(
+        address _account,
+        uint _nftId,
+        uint seed
+    ) external view onlyNFT returns (uint256 species, uint256 sex) {
+        uint256 random = uint256(
+            keccak256(
+                abi.encodePacked(
+                    block.timestamp,
+                    block.prevrandao,
+                    _account,
+                    _nftId,
+                    seed
+                )
+            )
+        );
+        uint256 randomSpeciesNum = random % listAvailableSpecies.length;
+        species = listAvailableSpecies[randomSpeciesNum];
+        sex = (random) % 2;
+    }
 
     receive() external payable {
         payable(nft).transfer(msg.value);

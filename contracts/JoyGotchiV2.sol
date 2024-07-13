@@ -29,8 +29,6 @@ contract JoyGotchiV2 is QRNG, ERC721 {
     uint256 public la = 2;
     uint256 public lb = 2;
 
-    uint256 public speciesCount;
-
     struct Evolution {
         string image;
         string name;
@@ -39,18 +37,13 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         uint256 nextEvolutionLevel;
     }
 
-    struct Species {
-        uint256 id;
-        uint256 genePoolNum;
-    }
-
     struct SpeciesDefaultAttrs {
         uint256 skinColor;
         uint256 hornStyle;
         uint256 wingStyle;
     }
 
-    mapping(uint256 => Species) public speciesList;
+    uint256 public speciesCount;
     mapping(uint256 => mapping(uint256 => Evolution))
         public speciesToEvolutions;
     mapping(uint256 => uint256) public speciesMaxEvolutionPhase;
@@ -110,7 +103,6 @@ contract JoyGotchiV2 is QRNG, ERC721 {
 
     event SpeciesCreated(
         uint256 id,
-        uint256 genePoolNum,
         uint256 speciesMaxPopulation
     );
 
@@ -199,6 +191,13 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         petWingStyle[_tokenIds] = speciesDefaultAttrs[newPetSpecies].wingStyle;
         petSex[_tokenIds] = newPetSex;
 
+        if (
+            currentSpeciesPopulation[newPetSpecies] ==
+            speciesMaxPopulation[newPetSpecies]
+        ) {
+            genePool.removeSpeciesFromGenePool(newPetSpecies);
+        }
+
         // mint NFT
         _mint(msg.sender, _tokenIds);
         _tokenIds++;
@@ -271,6 +270,13 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         uint256 speciesOfDead = petSpecies[_deadId];
         address ownerOfDead = ownerOf(_deadId);
 
+        if (
+            currentSpeciesPopulation[speciesOfDead] ==
+            speciesMaxPopulation[speciesOfDead]
+        ) {
+            genePool.addSpeciesToGenePool(speciesOfDead);
+        }
+
         _burn(_deadId);
         currentSpeciesPopulation[speciesOfDead] -= 1;
         // redeem for dead pet
@@ -307,6 +313,10 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         uint256 _score
     ) external isAuthorized {
         petScore[_nftId] += _score;
+        petRewardDebt[_nftId] = petScore[_nftId].mulDivDown(
+            ethAccPerShare,
+            PRECISION
+        );
         totalScores += _score;
     }
 
@@ -336,6 +346,13 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         timeUntilStarving[_tokenIds] = block.timestamp + 1 days;
         timePetBorn[_tokenIds] = block.timestamp;
 
+        if (
+            currentSpeciesPopulation[_newPetSpecies] ==
+            speciesMaxPopulation[_newPetSpecies]
+        ) {
+            genePool.removeSpeciesFromGenePool(_newPetSpecies);
+        }
+
         // mint NFT
         _mint(msg.sender, _tokenIds);
         _tokenIds++;
@@ -347,21 +364,24 @@ contract JoyGotchiV2 is QRNG, ERC721 {
     }
 
     function setPetInfoAfterAttack(
-        uint256 loserId,
         uint256 winnerId,
-        uint256 _score,
-        uint256 _rewardDebt
+        uint256 loserId,
+        uint256 _score
     ) external {
         require(msg.sender == attackContract, "Not authorized");
 
         petScore[loserId] -= _score;
-        petRewardDebt[loserId] -= _rewardDebt;
+        petRewardDebt[loserId] = petScore[loserId].mulDivDown(
+            ethAccPerShare,
+            PRECISION
+        );
 
         petScore[winnerId] += _score;
-        petRewardDebt[winnerId] += _rewardDebt;
-
+        petRewardDebt[winnerId] = petScore[winnerId].mulDivDown(
+            ethAccPerShare,
+            PRECISION
+        );
     }
-
 
     function lockPet(uint256 _nftId) external isAuthorized {
         require(isPetAlive(_nftId), "Can't lock dead pet");
@@ -722,12 +742,10 @@ contract JoyGotchiV2 is QRNG, ERC721 {
 
     function createSpecies(
         Evolution[] memory _evolutions,
-        uint256 _genePoolNum,
         SpeciesDefaultAttrs memory _defaultAttrs,
         uint256 _speciesMaxPopulation
     ) external onlyOwner {
         uint speciesId = speciesCount;
-        speciesList[speciesCount] = Species(speciesId, _genePoolNum);
         for (uint256 i = 0; i < _evolutions.length; i++) {
             speciesToEvolutions[speciesId][i] = _evolutions[i];
         }
@@ -736,9 +754,9 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         speciesMaxPopulation[speciesId] = _speciesMaxPopulation;
         speciesDefaultAttrs[speciesId] = _defaultAttrs;
 
-        genePool.addSpeciesToGenePool(speciesId, _genePoolNum);
+        genePool.addSpeciesToGenePool(speciesId);
         speciesCount++;
-        emit SpeciesCreated(speciesId, _genePoolNum, _speciesMaxPopulation);
+        emit SpeciesCreated(speciesId, _speciesMaxPopulation);
     }
 
     // add items
