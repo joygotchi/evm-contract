@@ -32,11 +32,12 @@ contract JoyGotchiV2 is QRNG, ERC721 {
     address public immidiateUseItemsContract;
     address public treasury;
 
-    uint256 public _tokenIds;
-
     uint256 public la = 2;
     uint256 public lb = 2;
 
+    // Count pet id
+    uint256 public _tokenIds;
+    
     // pet properties
     mapping(uint256 => string) public petName;
     mapping(uint256 => uint256) public timeUntilStarving;
