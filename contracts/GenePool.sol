@@ -76,8 +76,13 @@ contract GenePool is Ownable {
     }
 
     // Call from NFT contract when a species is burned and the population is reduced from max
-    function reducePopulationAndAddSpeciesToGenePool(uint _speciesId) external onlyNFT returns (uint256) {
-        require(isSpeciesGeneInitialized[_speciesId], "Species not initialized");
+    function reducePopulationAndAddSpeciesToGenePool(
+        uint _speciesId
+    ) external onlyNFT returns (uint256) {
+        require(
+            isSpeciesGeneInitialized[_speciesId],
+            "Species not initialized"
+        );
         require(!isSpeciesGeneAvailableInGenePool[_speciesId], "Species added");
 
         currentSpeciesPopulation[_speciesId]--;
@@ -106,9 +111,13 @@ contract GenePool is Ownable {
     }
 
     function newMemberJoinSpecies(uint256 _speciesId) external onlyNFT {
-        require(isSpeciesGeneInitialized[_speciesId], "Species not initialized");
         require(
-            currentSpeciesPopulation[_speciesId] < speciesMaxPopulation[_speciesId],
+            isSpeciesGeneInitialized[_speciesId],
+            "Species not initialized"
+        );
+        require(
+            currentSpeciesPopulation[_speciesId] <
+                speciesMaxPopulation[_speciesId],
             "Max population reached"
         );
         currentSpeciesPopulation[_speciesId]++;
@@ -119,6 +128,8 @@ contract GenePool is Ownable {
         uint _nftId,
         uint seed
     ) external view onlyNFT returns (uint256 species, uint256 sex) {
+        require(listAvailableSpecies.length > 0, "No species available");
+
         uint256 random = uint256(
             keccak256(
                 abi.encodePacked(
@@ -135,11 +146,9 @@ contract GenePool is Ownable {
         sex = (random) % 2;
     }
 
-    function getSpeciesEvolutions(uint256 _speciesId)
-        external
-        view
-        returns (Evolution[] memory)
-    {
+    function getSpeciesEvolutions(
+        uint256 _speciesId
+    ) external view returns (Evolution[] memory) {
         Evolution[] memory evolutions = new Evolution[](
             speciesMaxEvolutionPhase[_speciesId] + 1
         );
@@ -149,11 +158,10 @@ contract GenePool is Ownable {
         return evolutions;
     }
 
-    function getSpeciesEvolutionPhaseInfo(uint256 _speciesId, uint256 _phase)
-        external
-        view
-        returns (Evolution memory)
-    {
+    function getSpeciesEvolutionPhaseInfo(
+        uint256 _speciesId,
+        uint256 _phase
+    ) external view returns (Evolution memory) {
         return speciesToEvolutions[_speciesId][_phase];
     }
 

@@ -433,6 +433,10 @@ contract JoyGotchiV2 is QRNG, ERC721 {
     }
 
     function getStatus(uint256 pet) public view returns (PetStatus _health) {
+        if(isPetLocked[pet]) {
+            return _lockedPetStatus[pet];
+        }
+
         if (!isPetAlive(pet)) {
             return PetStatus.DEAD;
         }
