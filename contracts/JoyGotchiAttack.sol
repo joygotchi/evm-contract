@@ -3,8 +3,6 @@
 pragma solidity ^0.8.17;
 
 import "./interfaces/IJoyGotchi.sol";
-import "./interfaces/IJoyGotchiItem.sol";
-import "./interfaces/IToken.sol";
 import "./JoyGotchiEnum.sol";
 import {FixedPointMathLib} from "solmate/src/utils/FixedPointMathLib.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
@@ -14,9 +12,6 @@ contract JoyGotchiAttack {
     using SafeMath for uint256;
 
     IJoyGotchi public joyGotchiNFT;
-    IJoyGotchiItem public joyGotchiNFTItem;
-    IToken public token;
-    address public treasury;
 
     uint256 PRECISION = 1 ether;
 
@@ -33,15 +28,9 @@ contract JoyGotchiAttack {
     event AttackBlocked(uint256 fromId, uint256 toId);
 
     constructor(
-        address _joyGotchiNFT,
-        address _joyGotchiNFTItem,
-        address _token,
-        address _treasury
+        address _joyGotchiNFT
     ) {
         joyGotchiNFT = IJoyGotchi(_joyGotchiNFT);
-        joyGotchiNFTItem = IJoyGotchiItem(_joyGotchiNFTItem);
-        token = IToken(_token);
-        treasury = _treasury;
     }
 
     modifier isApprovedJoyGotchiNFT(uint256 id) {

@@ -53,7 +53,7 @@ contract JoyGotchiBreed {
         require(
             joyGotchiNFT.ownerOf(id) == msg.sender ||
                 joyGotchiNFT.getApproved(id) == msg.sender,
-            "Not approved"
+            "Pet not approved"
         );
         _;
     }
@@ -140,11 +140,6 @@ contract JoyGotchiBreed {
         isApprovedJoyGotchiNFT(_nftId2)
         isApprovedJoyGotchiNFTItem(_itemId)
     {
-        require(
-            joyGotchiNFTItem.ownerOf(_itemId) == msg.sender,
-            "Not your item"
-        );
-
         uint256 species1 = joyGotchiNFT.petSpecies(_nftId);
         uint256 species2 = joyGotchiNFT.petSpecies(_nftId2);
 

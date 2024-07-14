@@ -76,4 +76,10 @@ interface IJoyGotchi {
         uint256 loserId,
         uint256 _score
     ) external;
+
+        function onComsumeImmidiateUseItem(
+        uint256 _nftId,
+        uint256 _itemTimeExtension,
+        uint256 _itemShield
+    ) external;
 }

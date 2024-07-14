@@ -12,7 +12,5 @@ enum PetStatus {
 enum ItemType {
     ACCESSORY,
     BREED,
-    ARCADE,
-    MINETOOL,
-    WEAPON
+    MINETOOL
 }

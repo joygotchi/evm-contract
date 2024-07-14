@@ -89,6 +89,24 @@ contract JoyGotchiStakingAndMining is Ownable {
         pricePerSlot = 35 ether;
     }
 
+    modifier isApprovedJoyGotchiNFT(uint256 id) {
+        require(
+            joyGotchiNFT.ownerOf(id) == msg.sender ||
+                joyGotchiNFT.getApproved(id) == msg.sender,
+            "Not approved"
+        );
+        _;
+    }
+
+    modifier isApprovedJoyGotchiNFTItem(uint256 id) {
+        require(
+            joyGotchiNFTItem.ownerOf(id) == msg.sender ||
+                joyGotchiNFTItem.getApproved(id) == msg.sender,
+            "Item not approved"
+        );
+        _;
+    }
+
     function createNewStakingPool(
         string memory _name,
         uint256[] memory _rewardNFTIds,
@@ -144,15 +162,13 @@ contract JoyGotchiStakingAndMining is Ownable {
         );
     }
 
-    function stake(uint256 _nftId, uint256 _poolId) public {
+    function stake(
+        uint256 _nftId,
+        uint256 _poolId
+    ) public isApprovedJoyGotchiNFT(_nftId) {
         PoolInfo storage pool = poolInfo[_poolId];
 
         require(_poolId < poolIds, "Pool ID not exist");
-
-        require(
-            joyGotchiNFT.ownerOf(_nftId) == msg.sender,
-            "You are not the owner of this pet"
-        );
 
         require(
             pool.stakingStartTime > block.timestamp,
@@ -228,7 +244,9 @@ contract JoyGotchiStakingAndMining is Ownable {
         );
     }
 
-    function addMiningTool(uint256 _toolId) public {
+    function addMiningTool(
+        uint256 _toolId
+    ) public isApprovedJoyGotchiNFTItem(_toolId) {
         require(
             joyGotchiNFTItem.itemType(_toolId) == ItemType.MINETOOL,
             "This item is not a mining tool"
@@ -237,11 +255,6 @@ contract JoyGotchiStakingAndMining is Ownable {
         require(
             miningToolUsed[msg.sender].length < MAX_MINING_TOOL,
             "You have reached the maximum mining tool"
-        );
-
-        require(
-            joyGotchiNFTItem.ownerOf(_toolId) == msg.sender,
-            "You are not the owner of this tool"
         );
 
         require(
