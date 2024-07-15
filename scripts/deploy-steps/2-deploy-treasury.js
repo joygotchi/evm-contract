@@ -12,7 +12,7 @@ async function main() {
   const JoyGotchiTreasury = await hre.ethers.getContractFactory(
     "JoyGotchiTreasury"
   );
-  const joyGotchiTreasury = await JoyGotchiTreasury.deploy(token.target);
+  const joyGotchiTreasury = await JoyGotchiTreasury.deploy(contracts.token);
   await joyGotchiTreasury.waitForDeployment();
   console.log("JoyGotchiTreasury:", joyGotchiTreasury.target);
 
