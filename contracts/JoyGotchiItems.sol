@@ -6,7 +6,7 @@ import {ERC721} from "solmate/src/tokens/ERC721.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
-import "./JoyGotchiEnum.sol";
+import "./helper/JoyGotchiEnum.sol";
 import "./interfaces/IJoyGotchi.sol";
 
 contract JoyGotchiItems is ERC721, Ownable {
@@ -264,7 +264,8 @@ contract JoyGotchiItems is ERC721, Ownable {
         epicDropRate = _rate;
     }
 
-    function setLegendaryItemDropRate(uint256 _rate) public onlyOwner {
+    function 
+    LegendaryItemDropRate(uint256 _rate) public onlyOwner {
         require(_rate <= MAX_CHANCE && _rate > epicDropRate, "Invalid rate");
         legendaryDropRate = _rate;
     }
@@ -344,7 +345,7 @@ contract JoyGotchiItems is ERC721, Ownable {
             );
     }
 
-    // Use to set allow for contract breed, stake, gacha, joygotchi
+    // Use to set allow for contract breed, stake, joygotchi
     function setAllowAddress(address _address, bool _allow) public onlyOwner {
         _allowAddress[_address] = _allow;
     }

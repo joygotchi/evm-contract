@@ -165,6 +165,18 @@ contract GenePool is Ownable {
         return speciesToEvolutions[_speciesId][_phase];
     }
 
+    function setHornStyleGeneNum(uint256 _hornStyleGeneNum) external onlyOwner {
+        hornStyleGeneNum = _hornStyleGeneNum;
+    }
+
+    function setWingStyleGeneNum(uint256 _wingStyleGeneNum) external onlyOwner {
+        wingStyleGeneNum = _wingStyleGeneNum;
+    }
+
+    function setSkinColorGeneNum(uint256 _skinColorGeneNum) external onlyOwner {
+        skinColorGeneNum = _skinColorGeneNum;
+    }
+
     receive() external payable {
         payable(nft).transfer(msg.value);
     }

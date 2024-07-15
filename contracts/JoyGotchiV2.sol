@@ -7,10 +7,10 @@ import {ERC721} from "solmate/src/tokens/ERC721.sol";
 import {FixedPointMathLib} from "solmate/src/utils/FixedPointMathLib.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {IGenePool} from "./interfaces/IGenePool.sol";
-import "./QRNG.sol";
-import "./JoyGotchiEnum.sol";
+import {QRNG} from "./QRNG.sol";
 import "./interfaces/IToken.sol";
 import "./interfaces/IJoyGotchiItem.sol";
+import "./helper/JoyGotchiEnum.sol";
 
 // ERC721,
 contract JoyGotchiV2 is QRNG, ERC721 {
@@ -37,7 +37,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
 
     // Count pet id
     uint256 public _tokenIds;
-    
+
     // pet properties
     mapping(uint256 => string) public petName;
     mapping(uint256 => uint256) public timeUntilStarving;
@@ -99,9 +99,11 @@ contract JoyGotchiV2 is QRNG, ERC721 {
 
     constructor(
         address _token,
-        address _qrngAirnode
+        address _qrngAirnode,
+        address _treasury
     ) QRNG(_qrngAirnode) ERC721("Joy Gotchi", "Joy Gotchi") {
         token = IToken(_token);
+        treasury = _treasury;
     }
 
     modifier isApproved(uint256 id) {
@@ -433,7 +435,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
     }
 
     function getStatus(uint256 pet) public view returns (PetStatus _health) {
-        if(isPetLocked[pet]) {
+        if (isPetLocked[pet]) {
             return _lockedPetStatus[pet];
         }
 
@@ -716,7 +718,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         genePool = IGenePool(_genePool);
     }
 
-    function setJoyGotchiItem(address _joyGotchiNFTItem) external onlyOwner {
+    function setJoyGotchiItemsContract(address _joyGotchiNFTItem) external onlyOwner {
         joyGotchiNFTItem = IJoyGotchiItem(_joyGotchiNFTItem);
     }
 

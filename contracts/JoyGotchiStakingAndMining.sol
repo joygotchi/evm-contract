@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import "./interfaces/IJoyGotchi.sol";
 import "./interfaces/IJoyGotchiItem.sol";
 import "./interfaces/IToken.sol";
-import "./JoyGotchiEnum.sol";
+import "./helper/JoyGotchiEnum.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract JoyGotchiStakingAndMining is Ownable {
@@ -270,61 +270,19 @@ contract JoyGotchiStakingAndMining is Ownable {
         joyGotchiNFTItem.lockItem(_toolId);
 
         uint256 miningPower = joyGotchiNFTItem.miningPower(_toolId);
-        uint256 newToolChargeTime = joyGotchiNFTItem.miningChargeTime(_toolId);
 
         miningToolUsed[msg.sender].push(_toolId);
 
-        if (miningToolUsed[msg.sender].length == 2) {
-            uint256 firstToolChargeTime = joyGotchiNFTItem.miningChargeTime(
-                miningToolUsed[msg.sender][0]
-            );
-
-            uint256 shorterChargeTimeToolId = firstToolChargeTime <
-                newToolChargeTime
-                ? miningToolUsed[msg.sender][0]
-                : _toolId;
-            uint256 reducedChargeTime = joyGotchiNFTItem.miningChargeTime(
-                shorterChargeTimeToolId
-            ) / 2;
-
-            totalMiningChargeTime[msg.sender] =
-                totalMiningChargeTime[msg.sender] -
-                reducedChargeTime +
-                newToolChargeTime;
-        } else if (miningToolUsed[msg.sender].length == 3) {
-            uint256 firstToolChargeTime = joyGotchiNFTItem.miningChargeTime(
-                miningToolUsed[msg.sender][0]
-            );
-            uint256 secondToolChargeTime = joyGotchiNFTItem.miningChargeTime(
-                miningToolUsed[msg.sender][1]
-            );
-
-            uint256 shorterChargeTimeToolId = firstToolChargeTime <
-                secondToolChargeTime
-                ? miningToolUsed[msg.sender][0]
-                : miningToolUsed[msg.sender][1];
-            uint256 shortestChargeTimeToolId = joyGotchiNFTItem
-                .miningChargeTime(shorterChargeTimeToolId) < newToolChargeTime
-                ? shorterChargeTimeToolId
-                : _toolId;
-
-            uint256 reducedChargeTime = joyGotchiNFTItem.miningChargeTime(
-                shortestChargeTimeToolId
-            );
-
-            totalMiningChargeTime[msg.sender] =
-                totalMiningChargeTime[msg.sender] -
-                reducedChargeTime +
-                newToolChargeTime;
-        } else {
-            totalMiningChargeTime[msg.sender] += joyGotchiNFTItem
-                .miningChargeTime(_toolId);
-        }
-
+        totalMiningChargeTime[msg.sender] = _caculateChargeOfTime(
+            miningToolUsed[msg.sender].length
+        );
         totalMiningPower[msg.sender] += miningPower;
         miningToolOwner[_toolId] = msg.sender;
 
-        if (lastMiningTime[msg.sender] == 0) {
+        if (
+            lastMiningTime[msg.sender] == 0 ||
+            miningToolUsed[msg.sender].length == 1
+        ) {
             lastMiningTime[msg.sender] = block.timestamp;
         }
 
@@ -341,19 +299,15 @@ contract JoyGotchiStakingAndMining is Ownable {
 
         uint256 miningPower = joyGotchiNFTItem.miningPower(_toolId);
 
-        uint256 chargeOfTime = joyGotchiNFTItem.miningChargeTime(_toolId);
-
         totalMiningPower[msg.sender] -= miningPower;
-
-        if (totalMiningChargeTime[msg.sender] < chargeOfTime) {
-            totalMiningChargeTime[msg.sender] = 0;
-        } else {
-            totalMiningChargeTime[msg.sender] -= chargeOfTime;
-        }
 
         miningToolOwner[_toolId] = address(0);
 
         _removeItemFromListTool(_toolId);
+
+        totalMiningChargeTime[msg.sender] = _caculateChargeOfTime(
+            miningToolUsed[msg.sender].length
+        );
 
         emit MiningToolRemoved(_toolId, msg.sender);
     }
@@ -443,6 +397,79 @@ contract JoyGotchiStakingAndMining is Ownable {
 
     function setPricePerSlot(uint256 _pricePerSlot) public onlyOwner {
         pricePerSlot = _pricePerSlot;
+    }
+
+    /** 
+        @dev Calculate the charge of time for mining
+        If user has 1 tool, the charge of time is the charge of time of the tool
+        If user has 2 tools, the charge of time is the sum of charge of time of the 2 tools, the shorter charge of time tool will be reduced by half
+        If user has 3 tools, the charge of time is the sum of charge of time of the 3 tools, the shortest charge of time tool will be ignored
+        @param numberOfTools Number of tools used for mining
+        @return uint256 Charge of time for mining 
+    */
+    function _caculateChargeOfTime(
+        uint256 numberOfTools
+    ) private view returns (uint256) {
+        if (numberOfTools == 1) {
+            uint256 _chargeOfTime = joyGotchiNFTItem.miningChargeTime(
+                miningToolUsed[msg.sender][0]
+            );
+            return _chargeOfTime;
+        } else if (numberOfTools == 2) {
+            uint256 firstToolChargeTime = joyGotchiNFTItem.miningChargeTime(
+                miningToolUsed[msg.sender][0]
+            );
+
+            uint256 secondToolChargeTime = joyGotchiNFTItem.miningChargeTime(
+                miningToolUsed[msg.sender][1]
+            );
+
+            uint256 shorterChargeTimeToolId = firstToolChargeTime <
+                secondToolChargeTime
+                ? miningToolUsed[msg.sender][0]
+                : miningToolUsed[msg.sender][1];
+
+            uint256 _reducedChargeTime = joyGotchiNFTItem.miningChargeTime(
+                shorterChargeTimeToolId
+            ) / 2;
+
+            // Total charge time = first tool charge time + new tool charge time - reduced charge time
+            return
+                firstToolChargeTime + secondToolChargeTime - _reducedChargeTime;
+        } else {
+            uint256 firstToolChargeTime = joyGotchiNFTItem.miningChargeTime(
+                miningToolUsed[msg.sender][0]
+            );
+
+            uint256 secondToolChargeTime = joyGotchiNFTItem.miningChargeTime(
+                miningToolUsed[msg.sender][1]
+            );
+
+            uint256 thirdToolChargeTime = joyGotchiNFTItem.miningChargeTime(
+                miningToolUsed[msg.sender][2]
+            );
+
+            uint256 shorterChargeTimeToolId = firstToolChargeTime <
+                secondToolChargeTime
+                ? miningToolUsed[msg.sender][0]
+                : miningToolUsed[msg.sender][1];
+
+            uint256 shortestChargeTimeToolId = joyGotchiNFTItem
+                .miningChargeTime(shorterChargeTimeToolId) < thirdToolChargeTime
+                ? shorterChargeTimeToolId
+                : miningToolUsed[msg.sender][2];
+
+            uint256 _reducedChargeTime = joyGotchiNFTItem.miningChargeTime(
+                shortestChargeTimeToolId
+            );
+
+            // Total charge time = first tool charge time + second tool charge time + new tool charge time - reduced charge time
+            return
+                firstToolChargeTime +
+                secondToolChargeTime +
+                thirdToolChargeTime -
+                _reducedChargeTime;
+        }
     }
 
     function _removeItemFromListTool(uint256 _value) private {

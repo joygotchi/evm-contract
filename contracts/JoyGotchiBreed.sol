@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import "./interfaces/IJoyGotchi.sol";
 import "./interfaces/IJoyGotchiItem.sol";
 import "./interfaces/IToken.sol";
-import "./JoyGotchiEnum.sol";
+import "./helper/JoyGotchiEnum.sol";
 
 contract JoyGotchiBreed {
     IJoyGotchi public joyGotchiNFT;

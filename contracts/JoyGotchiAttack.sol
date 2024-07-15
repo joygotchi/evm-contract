@@ -3,7 +3,7 @@
 pragma solidity ^0.8.17;
 
 import "./interfaces/IJoyGotchi.sol";
-import "./JoyGotchiEnum.sol";
+import "./helper/JoyGotchiEnum.sol";
 import {FixedPointMathLib} from "solmate/src/utils/FixedPointMathLib.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
