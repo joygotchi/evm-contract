@@ -8,7 +8,6 @@ async function main() {
 
   console.log("Deploying contracts with the account:", deployer.address);
 
-  // Deploy Token contract
   const Faucet = await hre.ethers.getContractFactory("JoyGotchiFaucet");
   const faucet = await Faucet.deploy(contracts.token);
   await faucet.waitForDeployment();

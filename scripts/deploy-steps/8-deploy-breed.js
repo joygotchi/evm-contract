@@ -8,7 +8,6 @@ async function main() {
 
   console.log("Deploying contracts with the account:", deployer.address);
 
-  // Deploy Token contract
   const JoyGotchiBreed = await hre.ethers.getContractFactory("JoyGotchiBreed");
   const joyGotchiBreed = await JoyGotchiBreed.deploy(
     contracts.joyGotchiV2,

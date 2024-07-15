@@ -8,7 +8,6 @@ async function main() {
 
   console.log("Deploying contracts with the account:", deployer.address);
 
-  // Deploy Token contract
   const GenePool = await hre.ethers.getContractFactory("GenePool");
   const genePool = await GenePool.deploy(contracts.joyGotchiV2, 2, 2, 2); // 2, 2, 2 for testing skinColorGeneNum, wingStyleGeneNum, hornStyleGeneNum, may change on prod
   await genePool.waitForDeployment();

@@ -8,7 +8,6 @@ async function main() {
 
   console.log("Deploying contracts with the account:", deployer.address);
 
-  // Deploy Token contract
   const JoyGotchiImmidiateUseItems = await hre.ethers.getContractFactory(
     "JoyGotchiImmidiateUseItems"
   );
