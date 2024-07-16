@@ -11,9 +11,10 @@ import {QRNG} from "./QRNG.sol";
 import "./interfaces/IToken.sol";
 import "./interfaces/IRaiGotchiItem.sol";
 import "./helper/RaiGotchiEnum.sol";
+import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 // ERC721,
-contract RaiGotchiV2 is QRNG, ERC721 {
+contract RaiGotchiV2 is QRNG, ERC721, Pausable {
     using SafeTransferLib for address payable;
     using FixedPointMathLib for uint256;
     using SafeMath for uint256;
@@ -130,7 +131,7 @@ contract RaiGotchiV2 is QRNG, ERC721 {
                         Game Actions
     //////////////////////////////////////////////////////////////*/
 
-    function mint() public {
+    function mint() public whenNotPaused {
         // require(_tokenIds < 20_000, "Over the limit");
 
         token.transferFrom(msg.sender, treasury, mintPrice);
@@ -167,7 +168,7 @@ contract RaiGotchiV2 is QRNG, ERC721 {
     }
 
     // kill and burn pets.
-    function kill(uint256 _deadId) external {
+    function kill(uint256 _deadId) external whenNotPaused {
         require(
             !isPetAlive(_deadId),
             "The pet has to be starved to claim his points"
@@ -204,7 +205,7 @@ contract RaiGotchiV2 is QRNG, ERC721 {
     function addAccessoryToPet(
         uint256 _nftId,
         uint256 _itemId
-    ) external isApproved(_nftId) {
+    ) external isApproved(_nftId) whenNotPaused {
         require(
             raiGotchiNFTItem.ownerOf(_itemId) == msg.sender ||
                 raiGotchiNFTItem.getApproved(_itemId) == msg.sender,
@@ -237,7 +238,7 @@ contract RaiGotchiV2 is QRNG, ERC721 {
     function removeAccessoryFromPet(
         uint256 _nftId,
         uint256 _itemId
-    ) external isApproved(_nftId) {
+    ) external isApproved(_nftId) whenNotPaused {
         require(!raiGotchiNFTItem.isItemLock(_itemId), "Item is not locked");
 
         raiGotchiNFTItem.unlockItem(_itemId);
@@ -272,20 +273,20 @@ contract RaiGotchiV2 is QRNG, ERC721 {
     function setPetName(
         uint256 _id,
         string memory _name
-    ) external isApproved(_id) {
+    ) external isApproved(_id) whenNotPaused {
         petName[_id] = _name;
     }
 
     function checkPetEvoleAndUpdateIfNeeded(
         uint256 _nftId
-    ) external isAuthorized {
+    ) external isAuthorized whenNotPaused {
         _evolvePetIfNeeded(_nftId);
     }
 
     function addPetScoreAfterUsedItem(
         uint256 _nftId,
         uint256 _score
-    ) external isAuthorized {
+    ) external isAuthorized whenNotPaused {
         if (petScore[_nftId] > 0) {
             ethOwed[_nftId] = pendingEth(_nftId);
         }
@@ -303,7 +304,7 @@ contract RaiGotchiV2 is QRNG, ERC721 {
         uint256 _newPetSpecies,
         uint256 _parent1Id,
         uint256 _parent2Id
-    ) external {
+    ) external whenNotPaused {
         require(
             msg.sender == breedContract,
             "Only breed contract can create new pet"
@@ -336,7 +337,7 @@ contract RaiGotchiV2 is QRNG, ERC721 {
         _tokenIds++;
     }
 
-    function reducePetShield(uint256 _nftId) external {
+    function reducePetShield(uint256 _nftId) external whenNotPaused {
         require(msg.sender == attackContract, "Not authorized");
         petShield[_nftId] -= 1;
     }
@@ -345,7 +346,7 @@ contract RaiGotchiV2 is QRNG, ERC721 {
         uint256 winnerId,
         uint256 loserId,
         uint256 _score
-    ) external {
+    ) external whenNotPaused {
         require(msg.sender == attackContract, "Not authorized");
 
         petScore[loserId] -= _score;
@@ -361,7 +362,7 @@ contract RaiGotchiV2 is QRNG, ERC721 {
         );
     }
 
-    function lockPet(uint256 _nftId) external isAuthorized {
+    function lockPet(uint256 _nftId) external isAuthorized whenNotPaused {
         require(isPetAlive(_nftId), "Can't lock dead pet");
         isPetLocked[_nftId] = true;
         _petPendingStarvingTime[_nftId] =
@@ -370,7 +371,7 @@ contract RaiGotchiV2 is QRNG, ERC721 {
         _lockedPetStatus[_nftId] = getStatus(_nftId);
     }
 
-    function unlockPet(uint256 _nftId) external isAuthorized {
+    function unlockPet(uint256 _nftId) external isAuthorized whenNotPaused {
         isPetLocked[_nftId] = false;
         timeUntilStarving[_nftId] =
             block.timestamp +
@@ -390,7 +391,10 @@ contract RaiGotchiV2 is QRNG, ERC721 {
     }
 
     // just side quest for later to add to ui, one thing in the game that can be passed to other players
-    function pass(uint256 from, uint256 to) external isApproved(from) {
+    function pass(
+        uint256 from,
+        uint256 to
+    ) external isApproved(from) whenNotPaused {
         require(hasTheDiamond == from, "you don't have it");
         require(ownerOf(to) != address(0x0), "don't burn it");
 
@@ -403,7 +407,7 @@ contract RaiGotchiV2 is QRNG, ERC721 {
         uint256 _nftId,
         uint256 _itemTimeExtension,
         uint256 _itemShield
-    ) external {
+    ) external whenNotPaused {
         require(msg.sender == immidiateUseItemsContract, "Not authorized");
 
         // recalculate time until starving
@@ -718,7 +722,9 @@ contract RaiGotchiV2 is QRNG, ERC721 {
         genePool = IGenePool(_genePool);
     }
 
-    function setRaiGotchiItemsContract(address _raiGotchiNFTItem) external onlyOwner {
+    function setRaiGotchiItemsContract(
+        address _raiGotchiNFTItem
+    ) external onlyOwner {
         raiGotchiNFTItem = IRaiGotchiItem(_raiGotchiNFTItem);
     }
 
@@ -730,6 +736,22 @@ contract RaiGotchiV2 is QRNG, ERC721 {
 
     function setMintPrice(uint256 _price) external onlyOwner {
         mintPrice = _price;
+    }
+
+    /**
+     * @dev Pauses the contract.
+     * Only the contract owner can call this function.
+     */
+    function pause() external onlyOwner {
+        super._pause();
+    }
+
+    /**
+     * @dev Unpauses the contract.
+     * Only the contract owner can call this function.
+     */
+    function unpause() external onlyOwner {
+        super._unpause();
     }
 
     /**
@@ -857,7 +879,7 @@ contract RaiGotchiV2 is QRNG, ERC721 {
         address from,
         address to,
         uint256 tokenId
-    ) public override {
+    ) public override whenNotPaused {
         require(!isPetLocked[tokenId], "Can't transfer locked pet");
         super.transferFrom(from, to, tokenId);
     }

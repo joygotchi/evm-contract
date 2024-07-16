@@ -7,8 +7,9 @@ import "./interfaces/IRaiGotchiItem.sol";
 import "./interfaces/IToken.sol";
 import "./helper/RaiGotchiEnum.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
-contract RaiGotchiStakingAndMining is Ownable {
+contract RaiGotchiStakingAndMining is Ownable, Pausable {
     IRaiGotchi public raiGotchiNFT;
     IRaiGotchiItem public raiGotchiNFTItem;
     IToken public token;
@@ -115,7 +116,7 @@ contract RaiGotchiStakingAndMining is Ownable {
         uint256 _maxSlotsInPool,
         uint256 _tokenRewardPerSlot,
         uint256 _maxSlotPerWallet
-    ) public onlyOwner {
+    ) public onlyOwner whenNotPaused {
         for (uint i = 0; i < _rewardNFTIds.length; i++) {
             require(
                 _rewardNFTIds[i] < raiGotchiNFTItem.totalPrototypeItems(),
@@ -165,7 +166,7 @@ contract RaiGotchiStakingAndMining is Ownable {
     function stake(
         uint256 _nftId,
         uint256 _poolId
-    ) public isApprovedraiGotchiNFT(_nftId) {
+    ) public isApprovedraiGotchiNFT(_nftId) whenNotPaused {
         PoolInfo storage pool = poolInfo[_poolId];
 
         require(_poolId < poolIds, "Pool ID not exist");
@@ -208,7 +209,7 @@ contract RaiGotchiStakingAndMining is Ownable {
         emit PetStaked(_nftId, _poolId);
     }
 
-    function unstake(uint256 _nftId, uint256 _poolId) public {
+    function unstake(uint256 _nftId, uint256 _poolId) public whenNotPaused {
         PoolInfo memory pool = poolInfo[_poolId];
 
         require(_poolId < poolIds, "Invalid pool id");
@@ -246,7 +247,7 @@ contract RaiGotchiStakingAndMining is Ownable {
 
     function addMiningTool(
         uint256 _toolId
-    ) public isApprovedraiGotchiNFTItem(_toolId) {
+    ) public isApprovedraiGotchiNFTItem(_toolId) whenNotPaused {
         require(
             raiGotchiNFTItem.itemType(_toolId) == ItemType.MINETOOL,
             "This item is not a mining tool"
@@ -289,7 +290,7 @@ contract RaiGotchiStakingAndMining is Ownable {
         emit MiningToolAdded(_toolId, msg.sender);
     }
 
-    function removeMiningTool(uint256 _toolId) public {
+    function removeMiningTool(uint256 _toolId) public whenNotPaused {
         require(
             miningToolOwner[_toolId] == msg.sender,
             "You are not the owner of this tool"
@@ -312,7 +313,7 @@ contract RaiGotchiStakingAndMining is Ownable {
         emit MiningToolRemoved(_toolId, msg.sender);
     }
 
-    function mining() public {
+    function mining() public whenNotPaused {
         require(
             totalMiningPower[msg.sender] > 0,
             "You do not have any mining tool"
@@ -337,7 +338,7 @@ contract RaiGotchiStakingAndMining is Ownable {
         emit Mined(msg.sender, totalPointsMined);
     }
 
-    function redemnMiningPoints() public {
+    function redemnMiningPoints() public whenNotPaused {
         uint256 _miningPoints = miningPoints[msg.sender];
 
         require(
@@ -359,7 +360,7 @@ contract RaiGotchiStakingAndMining is Ownable {
         emit PointsRedemed(msg.sender, prototypeTokenId);
     }
 
-    function ownerWithdrawRedundantToken(uint256 _poolId) public onlyOwner {
+    function ownerWithdrawRedundantToken(uint256 _poolId) public onlyOwner whenNotPaused {
         PoolInfo memory pool = poolInfo[_poolId];
 
         require(
@@ -387,7 +388,7 @@ contract RaiGotchiStakingAndMining is Ownable {
         chargeOfTimeMultiplier = _chargeOfTimeMultiplier;
     }
 
-    function setMiningPointsUsedPerRedemn(uint256 _points) public onlyOwner {
+    function setMiningPointsUsedPerRedemn(uint256 _points) public onlyOwner  {
         pointsUsedPerRedemn = _points;
     }
 
@@ -483,5 +484,21 @@ contract RaiGotchiStakingAndMining is Ownable {
                 break;
             }
         }
+    }
+
+    /**
+     * @dev Pauses the contract.
+     * Only the contract owner can call this function.
+     */
+    function pause() external onlyOwner {
+        super._pause();
+    }
+
+    /**
+     * @dev Unpauses the contract.
+     * Only the contract owner can call this function.
+     */
+    function unpause() external onlyOwner {
+        super._unpause();
     }
 }

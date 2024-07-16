@@ -6,8 +6,10 @@ import "./interfaces/IRaiGotchi.sol";
 import "./helper/RaiGotchiEnum.sol";
 import {FixedPointMathLib} from "solmate/src/utils/FixedPointMathLib.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
-contract RaiGotchiAttack {
+contract RaiGotchiAttack is Ownable, Pausable {
     using FixedPointMathLib for uint256;
     using SafeMath for uint256;
 
@@ -43,7 +45,7 @@ contract RaiGotchiAttack {
     function attack(
         uint256 fromId,
         uint256 toId
-    ) external isApprovedRaiGotchiNFT(fromId) {
+    ) external whenNotPaused isApprovedRaiGotchiNFT(fromId) {
         require(fromId != toId, "Can't hurt yourself");
         require(raiGotchiNFT.isPetAlive(fromId), "Your pet is dead");
         require(
@@ -200,5 +202,21 @@ contract RaiGotchiAttack {
                     )
                 )
             );
+    }
+
+    /**
+     * @dev Pauses the contract.
+     * Only the contract owner can call this function.
+     */
+    function pause() external onlyOwner {
+        super._pause();
+    }
+
+    /**
+     * @dev Unpauses the contract.
+     * Only the contract owner can call this function.
+     */
+    function unpause() external onlyOwner {
+        super._unpause();
     }
 }

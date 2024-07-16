@@ -8,8 +8,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 import "./helper/RaiGotchiEnum.sol";
 import "./interfaces/IRaiGotchi.sol";
+import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
-contract RaiGotchiItems is ERC721, Ownable {
+contract RaiGotchiItems is ERC721, Ownable, Pausable {
     enum ItemRarity {
         Common,
         Rare,
@@ -101,7 +102,10 @@ contract RaiGotchiItems is ERC721, Ownable {
         return itemImage[_id];
     }
 
-    function mint(address _to, uint256 _prototypeItemId) public isValid {
+    function mint(
+        address _to,
+        uint256 _prototypeItemId
+    ) public isValid whenNotPaused {
         require(_prototypeItemId < totalPrototypeItems, "Invalid prototype id");
         uint256 currentTokenId = totalItems;
         itemImage[currentTokenId] = prototypeItemImage[_prototypeItemId];
@@ -126,7 +130,7 @@ contract RaiGotchiItems is ERC721, Ownable {
         emit ItemMinted(currentTokenId, _to, _prototypeItemId);
     }
 
-    function burn(uint256 _tokenId) public isValid {
+    function burn(uint256 _tokenId) public isValid whenNotPaused {
         delete itemImage[_tokenId];
         delete itemType[_tokenId];
         delete cooldownBreedTime[_tokenId];
@@ -138,11 +142,11 @@ contract RaiGotchiItems is ERC721, Ownable {
         _burn(_tokenId);
     }
 
-    function lockItem(uint256 _tokenId) public isValid {
+    function lockItem(uint256 _tokenId) public isValid whenNotPaused {
         isItemLock[_tokenId] = true;
     }
 
-    function unlockItem(uint256 _tokenId) public isValid {
+    function unlockItem(uint256 _tokenId) public isValid whenNotPaused {
         isItemLock[_tokenId] = false;
     }
 
@@ -150,7 +154,7 @@ contract RaiGotchiItems is ERC721, Ownable {
         address from,
         address to,
         uint256 tokenId
-    ) public override {
+    ) public override whenNotPaused {
         require(!isItemLock[tokenId], "Item is locked");
         super.transferFrom(from, to, tokenId);
     }
@@ -164,7 +168,7 @@ contract RaiGotchiItems is ERC721, Ownable {
         ItemType _prototypeItemType,
         uint256 _prototypeItemminingPower,
         uint256 _prototypeItemminingChargeTime
-    ) public onlyOwner {
+    ) public onlyOwner whenNotPaused {
         if (_prototypeItemRarity > ItemRarity.Epic) {
             revert("Invalid item type");
         }
@@ -205,7 +209,7 @@ contract RaiGotchiItems is ERC721, Ownable {
         uint256 _prototypeItemPoints,
         uint256 _prototypeItemminingPower,
         uint256 _prototypeItemminingChargeTime
-    ) public onlyOwner {
+    ) public onlyOwner whenNotPaused {
         require(_prototypeId < totalPrototypeItems, "Invalid prototype id");
         prototypeItemImage[_prototypeId] = _prototypeItemImage;
         prototypeItemRarity[_prototypeId] = _prototypeItemRarity;
@@ -225,7 +229,7 @@ contract RaiGotchiItems is ERC721, Ownable {
     function getPrototypeForNewItem(
         address _account,
         uint seed
-    ) external isValid returns (uint256 prototypeItemId) {
+    ) external isValid whenNotPaused returns (uint256 prototypeItemId) {
         uint256 walletSeed = raiGotchiNFT.getWalletSeedAndUpdateIfNeeded();
 
         uint256 random = uint256(
@@ -371,5 +375,21 @@ contract RaiGotchiItems is ERC721, Ownable {
             _i /= 10;
         }
         return string(bstr);
+    }
+
+    /**
+     * @dev Pauses the contract.
+     * Only the contract owner can call this function.
+     */
+    function pause() external onlyOwner {
+        super._pause();
+    }
+
+    /**
+     * @dev Unpauses the contract.
+     * Only the contract owner can call this function.
+     */
+    function unpause() external onlyOwner {
+        super._unpause();
     }
 }

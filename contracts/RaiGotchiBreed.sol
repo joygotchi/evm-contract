@@ -6,8 +6,10 @@ import "./interfaces/IRaiGotchi.sol";
 import "./interfaces/IRaiGotchiItem.sol";
 import "./interfaces/IToken.sol";
 import "./helper/RaiGotchiEnum.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
-contract RaiGotchiBreed {
+contract RaiGotchiBreed is Ownable, Pausable {
     IRaiGotchi public raiGotchiNFT;
     IRaiGotchiItem public raiGotchiNFTItem;
     IToken public token;
@@ -136,6 +138,7 @@ contract RaiGotchiBreed {
         uint256 _itemId
     )
         external
+        whenNotPaused
         isApprovedRaiGotchiNFT(_nftId)
         isApprovedRaiGotchiNFT(_nftId2)
         isApprovedRaiGotchiNFTItem(_itemId)
@@ -182,7 +185,7 @@ contract RaiGotchiBreed {
         totalBreeds++;
     }
 
-    function claimBreed(uint256 _breedId) external {
+    function claimBreed(uint256 _breedId) external whenNotPaused {
         require(breedFinishTime[_breedId] != 0, "Not in breed");
 
         require(
@@ -256,5 +259,21 @@ contract RaiGotchiBreed {
                     )
                 )
             );
+    }
+
+    /**
+     * @dev Pauses the contract.
+     * Only the contract owner can call this function.
+     */
+    function pause() external onlyOwner {
+        super._pause();
+    }
+
+    /**
+     * @dev Unpauses the contract.
+     * Only the contract owner can call this function.
+     */
+    function unpause() external onlyOwner {
+        super._unpause();
     }
 }

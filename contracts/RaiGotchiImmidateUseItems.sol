@@ -6,8 +6,9 @@ import "./interfaces/IRaiGotchi.sol";
 import "./interfaces/IToken.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
-contract RaiGotchiImmidiateUseItems is Ownable {
+contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
     IRaiGotchi public raiGotchiNFT;
     IToken public token;
     address public treasury;
@@ -83,7 +84,7 @@ contract RaiGotchiImmidiateUseItems is Ownable {
     function buyImidiateUseItem(
         uint256 nftId,
         uint256 itemId
-    ) external payable isApproved(nftId) {
+    ) external payable isApproved(nftId) whenNotPaused {
         require(itemExists(itemId), "This item doesn't exist");
         require(
             raiGotchiNFT.isPetAlive(nftId) ||
@@ -127,7 +128,7 @@ contract RaiGotchiImmidiateUseItems is Ownable {
         uint256 attackBoost,
         uint256 defenseBoost,
         bool isRevival
-    ) external onlyOwner {
+    ) external onlyOwner whenNotPaused {
         uint256 newItemId = _itemIds;
         itemName[newItemId] = name;
         itemPrice[newItemId] = price;
@@ -165,7 +166,7 @@ contract RaiGotchiImmidiateUseItems is Ownable {
         uint256 _timeExtension,
         uint256 _shield,
         bool _isRevival
-    ) external onlyOwner {
+    ) external onlyOwner whenNotPaused {
         itemPrice[_id] = _price;
         itemPriceDelta[_id] = _priceDelta;
         itemStock[_id] = _stock;
@@ -174,5 +175,21 @@ contract RaiGotchiImmidiateUseItems is Ownable {
         itemTimeExtension[_id] = _timeExtension;
         itemShield[_id] = _shield;
         itemIsRevival[_id] = _isRevival;
+    }
+
+    /**
+     * @dev Pauses the contract.
+     * Only the contract owner can call this function.
+     */
+    function pause() external onlyOwner {
+        super._pause();
+    }
+
+    /**
+     * @dev Unpauses the contract.
+     * Only the contract owner can call this function.
+     */
+    function unpause() external onlyOwner {
+        super._unpause();
     }
 }
