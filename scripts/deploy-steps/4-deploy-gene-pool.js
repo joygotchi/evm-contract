@@ -9,7 +9,7 @@ async function main() {
   console.log("Deploying contracts with the account:", deployer.address);
 
   const GenePool = await hre.ethers.getContractFactory("GenePool");
-  const genePool = await GenePool.deploy(contracts.joyGotchiV2, 2, 2, 2); // 2, 2, 2 for testing skinColorGeneNum, wingStyleGeneNum, hornStyleGeneNum, may change on prod
+  const genePool = await GenePool.deploy(contracts.raiGotchiV2, 2, 2, 2); // 2, 2, 2 for testing skinColorGeneNum, wingStyleGeneNum, hornStyleGeneNum, may change on prod
   await genePool.waitForDeployment();
   console.log("GenePool:", genePool.target);
 

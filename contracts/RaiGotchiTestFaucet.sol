@@ -5,7 +5,7 @@ interface IERC20 {
     function transfer(address recipient, uint256 amount) external returns (bool);
 }
 
-contract JoyGotchiFaucet {
+contract RaiGotchiFaucet {
     IERC20 public token;
     address _owner;
     bool _isActive;
@@ -16,7 +16,7 @@ contract JoyGotchiFaucet {
         _isActive = true;
     }
 
-    function getJoy(address _to) external {
+    function getRaiToken(address _to) external {
         require(_isActive, "Faucet is not active");
         token.transfer(_to, 20000 ether);
     }

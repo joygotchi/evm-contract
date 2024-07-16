@@ -8,17 +8,17 @@ async function main() {
 
   console.log("Deploying contracts with the account:", deployer.address);
 
-  const JoyGotchiV2 = await hre.ethers.getContractFactory("JoyGotchiV2");
-  const joyGotchiV2 = await JoyGotchiV2.deploy(
+  const RaiGotchiV2 = await hre.ethers.getContractFactory("RaiGotchiV2");
+  const raiGotchiV2 = await RaiGotchiV2.deploy(
     contracts.token,
     contracts.qrngContract, //airnode rrp on lightlink testnet
-    contracts.joyGotchiTreasury
+    contracts.raiGotchiTreasury
   );
-  await joyGotchiV2.waitForDeployment();
-  console.log("JoyGotchi Pet:", joyGotchiV2.target);
+  await raiGotchiV2.waitForDeployment();
+  console.log("RaiGotchi Pet:", raiGotchiV2.target);
 
-  saveContract(network, "joyGotchiV2", joyGotchiV2.target);
-  console.log("JoyGotchiV2 contract saved");
+  saveContract(network, "raiGotchiV2", raiGotchiV2.target);
+  console.log("RaiGotchiV2 contract saved");
 }
 
 main()

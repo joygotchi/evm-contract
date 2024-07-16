@@ -9,156 +9,156 @@ async function main() {
   console.log("Deploying contracts with the account:", deployer.address);
 
   // Deploy Token contract
-  const Token = await hre.ethers.getContractFactory("JoyGotchiToken");
+  const Token = await hre.ethers.getContractFactory("RaiGotchiToken");
   const token = await Token.deploy(contracts.uniswapV2Router02);
   await token.waitForDeployment();
-  console.log("JoyGotchiToken:", token.target);
+  console.log("RaiGotchiToken:", token.target);
 
   saveContract(network, "token", token.target);
   console.log("Token contract saved");
 
-  // Deploy JoyGotchi Treasury contract
-  const JoyGotchiTreasury = await hre.ethers.getContractFactory(
-    "JoyGotchiTreasury"
+  // Deploy RaiGotchi Treasury contract
+  const RaiGotchiTreasury = await hre.ethers.getContractFactory(
+    "RaiGotchiTreasury"
   );
-  const joyGotchiTreasury = await JoyGotchiTreasury.deploy(token.target);
-  await joyGotchiTreasury.waitForDeployment();
-  console.log("JoyGotchiTreasury:", joyGotchiTreasury.target);
+  const raiGotchiTreasury = await RaiGotchiTreasury.deploy(token.target);
+  await raiGotchiTreasury.waitForDeployment();
+  console.log("RaiGotchiTreasury:", raiGotchiTreasury.target);
 
-  saveContract(network, "joyGotchiTreasury", joyGotchiTreasury.target);
-  console.log("JoyGotchiTreasury contract saved");
+  saveContract(network, "raiGotchiTreasury", raiGotchiTreasury.target);
+  console.log("RaiGotchiTreasury contract saved");
 
-  // Deploy JoyGotchi NFT contract (Pet)
-  const JoyGotchiV2 = await hre.ethers.getContractFactory("JoyGotchiV2");
-  const joyGotchiV2 = await JoyGotchiV2.deploy(
+  // Deploy RaiGotchi NFT contract (Pet)
+  const RaiGotchiV2 = await hre.ethers.getContractFactory("RaiGotchiV2");
+  const raiGotchiV2 = await RaiGotchiV2.deploy(
     token.target,
     contracts.qrngContract, //airnode rrp on lightlink testnet
-    joyGotchiTreasury.target
+    raiGotchiTreasury.target
   );
-  await joyGotchiV2.waitForDeployment();
-  console.log("JoyGotchi Pet:", joyGotchiV2.target);
+  await raiGotchiV2.waitForDeployment();
+  console.log("RaiGotchi Pet:", raiGotchiV2.target);
 
-  saveContract(network, "joyGotchiV2", joyGotchiV2.target);
-  console.log("JoyGotchiV2 contract saved");
+  saveContract(network, "raiGotchiV2", raiGotchiV2.target);
+  console.log("RaiGotchiV2 contract saved");
 
-  // Deploy JoyGotchi Gene Pool contract
+  // Deploy RaiGotchi Gene Pool contract
   const GenePool = await hre.ethers.getContractFactory("GenePool");
-  const genePool = await GenePool.deploy(joyGotchiV2.target, 2, 2, 2); // 2, 2, 2 for testing skinColorGeneNum, wingStyleGeneNum, hornStyleGeneNum, may change on prod
+  const genePool = await GenePool.deploy(raiGotchiV2.target, 2, 2, 2); // 2, 2, 2 for testing skinColorGeneNum, wingStyleGeneNum, hornStyleGeneNum, may change on prod
   await genePool.waitForDeployment();
   console.log("GenePool:", genePool.target);
 
   saveContract(network, "genePool", genePool.target);
   console.log("GenePool contract saved");
 
-  // Deploy JoyGotchi Faucet contract
-  const Faucet = await hre.ethers.getContractFactory("JoyGotchiFaucet");
+  // Deploy RaiGotchi Faucet contract
+  const Faucet = await hre.ethers.getContractFactory("RaiGotchiFaucet");
   const faucet = await Faucet.deploy(token.target);
   await faucet.waitForDeployment();
   console.log("Faucet:", faucet.target);
 
-  saveContract(network, "joyGotchiFaucet", faucet.target);
+  saveContract(network, "raiGotchiFaucet", faucet.target);
   console.log("Faucet contract saved");
 
-  // Deploy JoyGotchi NFT Items contract
-  const JoyGotchiItems = await hre.ethers.getContractFactory("JoyGotchiItems");
-  const joyGotchiItems = await JoyGotchiItems.deploy(joyGotchiV2.target);
-  await joyGotchiItems.waitForDeployment();
-  console.log("JoyGotchiItems:", joyGotchiItems.target);
+  // Deploy RaiGotchi NFT Items contract
+  const RaiGotchiItems = await hre.ethers.getContractFactory("RaiGotchiItems");
+  const raiGotchiItems = await RaiGotchiItems.deploy(raiGotchiV2.target);
+  await raiGotchiItems.waitForDeployment();
+  console.log("RaiGotchiItems:", raiGotchiItems.target);
 
-  saveContract(network, "joyGotchiItems", joyGotchiItems.target);
-  console.log("JoyGotchiItems contract saved");
+  saveContract(network, "raiGotchiItems", raiGotchiItems.target);
+  console.log("RaiGotchiItems contract saved");
 
-  // Deploy JoyGotchi Attack contract
-  const JoyGotchiAttack = await hre.ethers.getContractFactory(
-    "JoyGotchiAttack"
+  // Deploy RaiGotchi Attack contract
+  const RaiGotchiAttack = await hre.ethers.getContractFactory(
+    "RaiGotchiAttack"
   );
-  const joyGotchiAttack = await JoyGotchiAttack.deploy(joyGotchiV2.target);
-  await joyGotchiAttack.waitForDeployment();
-  console.log("JoyGotchiAttack:", joyGotchiAttack.target);
+  const raiGotchiAttack = await RaiGotchiAttack.deploy(raiGotchiV2.target);
+  await raiGotchiAttack.waitForDeployment();
+  console.log("RaiGotchiAttack:", raiGotchiAttack.target);
 
-  saveContract(network, "joyGotchiAttack", joyGotchiAttack.target);
-  console.log("JoyGotchiAttack contract saved");
+  saveContract(network, "raiGotchiAttack", raiGotchiAttack.target);
+  console.log("RaiGotchiAttack contract saved");
 
-  // Deploy JoyGotchi Breed contract
-  const JoyGotchiBreed = await hre.ethers.getContractFactory("JoyGotchiBreed");
-  const joyGotchiBreed = await JoyGotchiBreed.deploy(
-    joyGotchiV2.target,
-    joyGotchiItems.target,
+  // Deploy RaiGotchi Breed contract
+  const RaiGotchiBreed = await hre.ethers.getContractFactory("RaiGotchiBreed");
+  const raiGotchiBreed = await RaiGotchiBreed.deploy(
+    raiGotchiV2.target,
+    raiGotchiItems.target,
     token.target,
-    joyGotchiTreasury.target
+    raiGotchiTreasury.target
   );
-  await joyGotchiBreed.waitForDeployment();
-  console.log("JoyGotchiBreed:", joyGotchiBreed.target);
+  await raiGotchiBreed.waitForDeployment();
+  console.log("RaiGotchiBreed:", raiGotchiBreed.target);
 
-  saveContract(network, "joyGotchiBreed", joyGotchiBreed.target);
-  console.log("JoyGotchiBreed contract saved");
+  saveContract(network, "raiGotchiBreed", raiGotchiBreed.target);
+  console.log("RaiGotchiBreed contract saved");
 
-  // Deploy JoyGotchi Immidiate Use Items contract
-  const JoyGotchiImmidiateUseItems = await hre.ethers.getContractFactory(
-    "JoyGotchiImmidiateUseItems"
+  // Deploy RaiGotchi Immidiate Use Items contract
+  const RaiGotchiImmidiateUseItems = await hre.ethers.getContractFactory(
+    "RaiGotchiImmidiateUseItems"
   );
-  const joyGotchiImmidiateUseItems = await JoyGotchiImmidiateUseItems.deploy(
-    joyGotchiV2.target,
-    joyGotchiTreasury.target,
+  const raiGotchiImmidiateUseItems = await RaiGotchiImmidiateUseItems.deploy(
+    raiGotchiV2.target,
+    raiGotchiTreasury.target,
     token.target
   );
-  await joyGotchiImmidiateUseItems.waitForDeployment();
-  console.log("JoyGotchiImmidiateUseItems:", joyGotchiImmidiateUseItems.target);
+  await raiGotchiImmidiateUseItems.waitForDeployment();
+  console.log("RaiGotchiImmidiateUseItems:", raiGotchiImmidiateUseItems.target);
 
   saveContract(
     network,
-    "joyGotchiImmidiateUseItems",
-    joyGotchiImmidiateUseItems.target
+    "raiGotchiImmidiateUseItems",
+    raiGotchiImmidiateUseItems.target
   );
-  console.log("JoyGotchiImmidiateUseItems contract saved");
+  console.log("RaiGotchiImmidiateUseItems contract saved");
 
-  // Deploy JoyGotchi Staking And Mining contract
-  const JoyGotchiStakingAndMining = await hre.ethers.getContractFactory(
-    "JoyGotchiStakingAndMining"
+  // Deploy RaiGotchi Staking And Mining contract
+  const RaiGotchiStakingAndMining = await hre.ethers.getContractFactory(
+    "RaiGotchiStakingAndMining"
   );
-  const joyGotchiStakingAndMining = await JoyGotchiStakingAndMining.deploy(
-    joyGotchiV2.target,
-    joyGotchiItems.target,
+  const raiGotchiStakingAndMining = await RaiGotchiStakingAndMining.deploy(
+    raiGotchiV2.target,
+    raiGotchiItems.target,
     token.target,
-    joyGotchiTreasury.target
+    raiGotchiTreasury.target
   );
-  await joyGotchiStakingAndMining.waitForDeployment();
-  console.log("JoyGotchiStakingAndMining:", joyGotchiStakingAndMining.target);
+  await raiGotchiStakingAndMining.waitForDeployment();
+  console.log("RaiGotchiStakingAndMining:", raiGotchiStakingAndMining.target);
 
   saveContract(
     network,
-    "joyGotchiStakingAndMining",
-    joyGotchiStakingAndMining.target
+    "raiGotchiStakingAndMining",
+    raiGotchiStakingAndMining.target
   );
-  console.log("JoyGotchiStakingAndMining contract saved");
+  console.log("RaiGotchiStakingAndMining contract saved");
 
   console.log("Start Settings");
 
-  // Settings for system JoyGotchiV2 contract
-  await joyGotchiV2.setGenePool(genePool.target);
+  // Settings for system RaiGotchiV2 contract
+  await raiGotchiV2.setGenePool(genePool.target);
   console.log("Set GenePool success");
-  await joyGotchiV2.setBreedContract(joyGotchiBreed.target);
+  await raiGotchiV2.setBreedContract(raiGotchiBreed.target);
   console.log("Set BreedContract success");
-  await joyGotchiV2.setStakingAndMiningContract(
-    joyGotchiStakingAndMining.target
+  await raiGotchiV2.setStakingAndMiningContract(
+    raiGotchiStakingAndMining.target
   );
   console.log("Set StakingAndMiningContract success");
-  await joyGotchiV2.setAttackContract(joyGotchiAttack.target);
+  await raiGotchiV2.setAttackContract(raiGotchiAttack.target);
   console.log("Set AttackContract success");
-  await joyGotchiV2.setImmidiateUseItemsContract(
-    joyGotchiImmidiateUseItems.target
+  await raiGotchiV2.setImmidiateUseItemsContract(
+    raiGotchiImmidiateUseItems.target
   );
   console.log("Set ImmidiateUseItemsContract success");
-  await joyGotchiV2.setJoyGotchiItemsContract(joyGotchiItems.target);
-  console.log("Set JoyGotchiItemsContract success");
+  await raiGotchiV2.setRaiGotchiItemsContract(raiGotchiItems.target);
+  console.log("Set RaiGotchiItemsContract success");
 
-  // Settings allow contract to mint NFT for JoyGotchiItems contract
-  await joyGotchiItems.setAllowAddress(joyGotchiV2.target, true);
-  console.log("Allow JoyGotchiV2 for NFT items success");
-  await joyGotchiItems.setAllowAddress(joyGotchiBreed.target, true);
-  console.log("Allow JoyGotchiBreed for NFT items success");
-  await joyGotchiItems.setAllowAddress(joyGotchiStakingAndMining.target, true);
-  console.log("Allow JoyGotchiStakingAndMining for NFT items success");
+  // Settings allow contract to mint NFT for RaiGotchiItems contract
+  await raiGotchiItems.setAllowAddress(raiGotchiV2.target, true);
+  console.log("Allow RaiGotchiV2 for NFT items success");
+  await raiGotchiItems.setAllowAddress(raiGotchiBreed.target, true);
+  console.log("Allow RaiGotchiBreed for NFT items success");
+  await raiGotchiItems.setAllowAddress(raiGotchiStakingAndMining.target, true);
+  console.log("Allow RaiGotchiStakingAndMining for NFT items success");
 
   await token.transfer(faucet.target, ethers.parseEther("1000000"));
   console.log("Transfer token to faucet success");
@@ -177,22 +177,22 @@ async function main() {
   });
 
   await hre.run("verify:verify", {
-    address: joyGotchiTreasury.target,
+    address: raiGotchiTreasury.target,
     constructorArguments: [token.target],
   });
 
   await hre.run("verify:verify", {
-    address: joyGotchiV2.target,
+    address: raiGotchiV2.target,
     constructorArguments: [
       token.target,
       contracts.qrngContract,
-      joyGotchiTreasury.target,
+      raiGotchiTreasury.target,
     ],
   });
 
   await hre.run("verify:verify", {
     address: genePool.target,
-    constructorArguments: [joyGotchiV2.target, 2, 2, 2],
+    constructorArguments: [raiGotchiV2.target, 2, 2, 2],
   });
 
   await hre.run("verify:verify", {
@@ -201,41 +201,41 @@ async function main() {
   });
 
   await hre.run("verify:verify", {
-    address: joyGotchiItems.target,
-    constructorArguments: [joyGotchiV2.target],
+    address: raiGotchiItems.target,
+    constructorArguments: [raiGotchiV2.target],
   });
 
   await hre.run("verify:verify", {
-    address: joyGotchiAttack.target,
-    constructorArguments: [joyGotchiV2.target],
+    address: raiGotchiAttack.target,
+    constructorArguments: [raiGotchiV2.target],
   });
 
   await hre.run("verify:verify", {
-    address: joyGotchiBreed.target,
+    address: raiGotchiBreed.target,
     constructorArguments: [
-      joyGotchiV2.target,
-      joyGotchiItems.target,
+      raiGotchiV2.target,
+      raiGotchiItems.target,
       token.target,
-      joyGotchiTreasury.target,
+      raiGotchiTreasury.target,
     ],
   });
 
   await hre.run("verify:verify", {
-    address: joyGotchiImmidiateUseItems.target,
+    address: raiGotchiImmidiateUseItems.target,
     constructorArguments: [
-      joyGotchiV2.target,
-      joyGotchiTreasury.target,
+      raiGotchiV2.target,
+      raiGotchiTreasury.target,
       token.target,
     ],
   });
 
   await hre.run("verify:verify", {
-    address: joyGotchiStakingAndMining.target,
+    address: raiGotchiStakingAndMining.target,
     constructorArguments: [
-      joyGotchiV2.target,
-      joyGotchiItems.target,
+      raiGotchiV2.target,
+      raiGotchiItems.target,
       token.target,
-      joyGotchiTreasury.target,
+      raiGotchiTreasury.target,
     ],
   });
 }

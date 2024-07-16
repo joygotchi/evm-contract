@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "../helper/JoyGotchiEnum.sol";
+import "../helper/RaiGotchiEnum.sol";
 
-interface IJoyGotchi {
+interface IRaiGotchi {
     function ownerOf(uint256 tokenId) external view returns (address);
 
     function getApproved(uint256 tokenId) external view returns (address);

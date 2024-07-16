@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "../helper/JoyGotchiEnum.sol";
+import "../helper/RaiGotchiEnum.sol";
 
-interface IJoyGotchiItem {
+interface IRaiGotchiItem {
     function itemType(uint256 id) external view returns (ItemType);
 
     function cooldownBreedTime(uint256 id) external view returns (uint256);

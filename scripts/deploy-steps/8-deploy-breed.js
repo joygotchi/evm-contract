@@ -8,18 +8,18 @@ async function main() {
 
   console.log("Deploying contracts with the account:", deployer.address);
 
-  const JoyGotchiBreed = await hre.ethers.getContractFactory("JoyGotchiBreed");
-  const joyGotchiBreed = await JoyGotchiBreed.deploy(
-    contracts.joyGotchiV2,
-    contracts.joyGotchiItems,
+  const RaiGotchiBreed = await hre.ethers.getContractFactory("RaiGotchiBreed");
+  const raiGotchiBreed = await RaiGotchiBreed.deploy(
+    contracts.raiGotchiV2,
+    contracts.raiGotchiItems,
     contracts.token,
-    contracts.joyGotchiTreasury
+    contracts.raiGotchiTreasury
   );
-  await joyGotchiBreed.waitForDeployment();
-  console.log("JoyGotchiBreed:", joyGotchiBreed.target);
+  await raiGotchiBreed.waitForDeployment();
+  console.log("RaiGotchiBreed:", raiGotchiBreed.target);
 
-  saveContract(network, "joyGotchiBreed", joyGotchiBreed.target);
-  console.log("JoyGotchiBreed contract saved");
+  saveContract(network, "raiGotchiBreed", raiGotchiBreed.target);
+  console.log("RaiGotchiBreed contract saved");
 }
 
 main()

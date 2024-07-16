@@ -9,11 +9,11 @@ import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {IGenePool} from "./interfaces/IGenePool.sol";
 import {QRNG} from "./QRNG.sol";
 import "./interfaces/IToken.sol";
-import "./interfaces/IJoyGotchiItem.sol";
-import "./helper/JoyGotchiEnum.sol";
+import "./interfaces/IRaiGotchiItem.sol";
+import "./helper/RaiGotchiEnum.sol";
 
 // ERC721,
-contract JoyGotchiV2 is QRNG, ERC721 {
+contract RaiGotchiV2 is QRNG, ERC721 {
     using SafeTransferLib for address payable;
     using FixedPointMathLib for uint256;
     using SafeMath for uint256;
@@ -24,7 +24,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
 
     IToken public token;
     IGenePool public genePool;
-    IJoyGotchiItem public joyGotchiNFTItem;
+    IRaiGotchiItem public raiGotchiNFTItem;
 
     address public breedContract;
     address public stakingAndMiningContract;
@@ -101,7 +101,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         address _token,
         address _qrngAirnode,
         address _treasury
-    ) QRNG(_qrngAirnode) ERC721("Joy Gotchi", "Joy Gotchi") {
+    ) QRNG(_qrngAirnode) ERC721("Rai Gotchi Pet", "Rai Gotchi") {
         token = IToken(_token);
         treasury = _treasury;
     }
@@ -206,21 +206,21 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         uint256 _itemId
     ) external isApproved(_nftId) {
         require(
-            joyGotchiNFTItem.ownerOf(_itemId) == msg.sender ||
-                joyGotchiNFTItem.getApproved(_itemId) == msg.sender,
+            raiGotchiNFTItem.ownerOf(_itemId) == msg.sender ||
+                raiGotchiNFTItem.getApproved(_itemId) == msg.sender,
             "Not your item"
         );
 
         require(
-            joyGotchiNFTItem.itemType(_itemId) == ItemType.ACCESSORY,
+            raiGotchiNFTItem.itemType(_itemId) == ItemType.ACCESSORY,
             "Not an accessory"
         );
 
-        require(joyGotchiNFTItem.isItemLock(_itemId), "Item is locked");
+        require(raiGotchiNFTItem.isItemLock(_itemId), "Item is locked");
 
-        joyGotchiNFTItem.lockItem(_itemId);
+        raiGotchiNFTItem.lockItem(_itemId);
 
-        uint256 _itemPoints = joyGotchiNFTItem.itemPoints(_itemId);
+        uint256 _itemPoints = raiGotchiNFTItem.itemPoints(_itemId);
 
         petScore[_nftId] += _itemPoints;
 
@@ -238,9 +238,9 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         uint256 _nftId,
         uint256 _itemId
     ) external isApproved(_nftId) {
-        require(!joyGotchiNFTItem.isItemLock(_itemId), "Item is not locked");
+        require(!raiGotchiNFTItem.isItemLock(_itemId), "Item is not locked");
 
-        joyGotchiNFTItem.unlockItem(_itemId);
+        raiGotchiNFTItem.unlockItem(_itemId);
 
         uint256[] storage _accessories = petAccessories[_nftId];
 
@@ -257,7 +257,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
 
         require(isItemFound, "Item not added to pet");
 
-        uint256 _itemPoints = joyGotchiNFTItem.itemPoints(_itemId);
+        uint256 _itemPoints = raiGotchiNFTItem.itemPoints(_itemId);
 
         petScore[_nftId] -= _itemPoints;
 
@@ -608,7 +608,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
                     (
                         (
                             abi.encodePacked(
-                                '{"name":"Joy Gotchi #',
+                                '{"name":"Rai Gotchi Pet #',
                                 _uint2str(id),
                                 '","image": ',
                                 '"',
@@ -718,8 +718,8 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         genePool = IGenePool(_genePool);
     }
 
-    function setJoyGotchiItemsContract(address _joyGotchiNFTItem) external onlyOwner {
-        joyGotchiNFTItem = IJoyGotchiItem(_joyGotchiNFTItem);
+    function setRaiGotchiItemsContract(address _raiGotchiNFTItem) external onlyOwner {
+        raiGotchiNFTItem = IRaiGotchiItem(_raiGotchiNFTItem);
     }
 
     function setImmidiateUseItemsContract(

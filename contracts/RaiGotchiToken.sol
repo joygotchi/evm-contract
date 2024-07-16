@@ -202,7 +202,7 @@ interface IUniswapV2Router02 {
     ) external;
 }
 
-contract JoyGotchiToken is ERC20, Ownable, ERC20Burnable {
+contract RaiGotchiToken is ERC20, Ownable, ERC20Burnable {
     using SafeMath for uint256;
     using SafeTransferLib for address payable;
 
@@ -280,7 +280,7 @@ contract JoyGotchiToken is ERC20, Ownable, ERC20Burnable {
         uint256 tokensIntoLiquidity
     );
 
-    constructor(address _routerAddress) ERC20("Joy Gotchi Token", "JGT") {
+    constructor(address _routerAddress) ERC20("Rai Gotchi Token", "JGT") {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
             _routerAddress
         ); 

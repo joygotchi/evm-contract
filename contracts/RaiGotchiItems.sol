@@ -6,10 +6,10 @@ import {ERC721} from "solmate/src/tokens/ERC721.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
-import "./helper/JoyGotchiEnum.sol";
-import "./interfaces/IJoyGotchi.sol";
+import "./helper/RaiGotchiEnum.sol";
+import "./interfaces/IRaiGotchi.sol";
 
-contract JoyGotchiItems is ERC721, Ownable {
+contract RaiGotchiItems is ERC721, Ownable {
     enum ItemRarity {
         Common,
         Rare,
@@ -17,7 +17,7 @@ contract JoyGotchiItems is ERC721, Ownable {
         Epic
     }
 
-    IJoyGotchi public joyGotchiNFT;
+    IRaiGotchi public raiGotchiNFT;
 
     mapping(address => bool) _allowAddress;
 
@@ -64,8 +64,8 @@ contract JoyGotchiItems is ERC721, Ownable {
         uint256 indexed prototypeId
     );
 
-    constructor(address _joyGotchiNFT) ERC721("Joy Gotchi Items", "JGCItems") {
-        joyGotchiNFT = IJoyGotchi(_joyGotchiNFT);
+    constructor(address _raiGotchiNFT) ERC721("Rai Gotchi Items", "JGCItems") {
+        raiGotchiNFT = IRaiGotchi(_raiGotchiNFT);
     }
 
     modifier isValid() {
@@ -226,7 +226,7 @@ contract JoyGotchiItems is ERC721, Ownable {
         address _account,
         uint seed
     ) external isValid returns (uint256 prototypeItemId) {
-        uint256 walletSeed = joyGotchiNFT.getWalletSeedAndUpdateIfNeeded();
+        uint256 walletSeed = raiGotchiNFT.getWalletSeedAndUpdateIfNeeded();
 
         uint256 random = uint256(
             keccak256(
@@ -264,8 +264,7 @@ contract JoyGotchiItems is ERC721, Ownable {
         epicDropRate = _rate;
     }
 
-    function 
-    LegendaryItemDropRate(uint256 _rate) public onlyOwner {
+    function LegendaryItemDropRate(uint256 _rate) public onlyOwner {
         require(_rate <= MAX_CHANCE && _rate > epicDropRate, "Invalid rate");
         legendaryDropRate = _rate;
     }
@@ -332,7 +331,7 @@ contract JoyGotchiItems is ERC721, Ownable {
                     (
                         (
                             abi.encodePacked(
-                                '{"name":"Joy Gotchi Item#',
+                                '{"name":"Rai Gotchi Item#',
                                 _uint2str(id),
                                 '","image": ',
                                 '"',
@@ -345,7 +344,7 @@ contract JoyGotchiItems is ERC721, Ownable {
             );
     }
 
-    // Use to set allow for contract breed, stake, joygotchi
+    // Use to set allow for contract breed, stake, raigotchi
     function setAllowAddress(address _address, bool _allow) public onlyOwner {
         _allowAddress[_address] = _allow;
     }

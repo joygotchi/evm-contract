@@ -12,65 +12,65 @@ async function main() {
   });
 
   await hre.run("verify:verify", {
-    address: contracts.joyGotchiTreasury,
+    address: contracts.raiGotchiTreasury,
     constructorArguments: [contracts.token],
   });
 
   await hre.run("verify:verify", {
-    address: contracts.joyGotchiV2,
+    address: contracts.raiGotchiV2,
     constructorArguments: [
       contracts.token,
       contracts.qrngContract,
-      contracts.joyGotchiTreasury,
+      contracts.raiGotchiTreasury,
     ],
   });
 
   await hre.run("verify:verify", {
     address: contracts.genePool,
-    constructorArguments: [contracts.joyGotchiV2, 2, 2, 2],
+    constructorArguments: [contracts.raiGotchiV2, 2, 2, 2],
   });
 
   await hre.run("verify:verify", {
-    address: contracts.joyGotchiFaucet,
+    address: contracts.raiGotchiFaucet,
     constructorArguments: [contracts.token],
   });
 
   await hre.run("verify:verify", {
-    address: contracts.joyGotchiItems,
-    constructorArguments: [contracts.joyGotchiV2],
+    address: contracts.raiGotchiItems,
+    constructorArguments: [contracts.raiGotchiV2],
   });
 
   await hre.run("verify:verify", {
-    address: contracts.joyGotchiAttack,
-    constructorArguments: [contracts.joyGotchiV2],
+    address: contracts.raiGotchiAttack,
+    constructorArguments: [contracts.raiGotchiV2],
   });
 
   await hre.run("verify:verify", {
-    address: contracts.joyGotchiBreed,
+    address: contracts.raiGotchiBreed,
     constructorArguments: [
-      contracts.joyGotchiV2,
-      contracts.joyGotchiItems,
+      contracts.raiGotchiV2,
+      contracts.raiGotchiItems,
       contracts.token,
-      contracts.joyGotchiTreasury,
+      contracts.raiGotchiTreasury,
     ],
   });
 
   await hre.run("verify:verify", {
-    address: contracts.joyGotchiImmidiateUseItems,
+    address: contracts.raiGotchiImmidiateUseItems,
     constructorArguments: [
-      contracts.joyGotchiV2,
-      contracts.joyGotchiTreasury,
+      contracts.raiGotchiV2,
+      contracts.raiGotchiTreasury,
       contracts.token,
     ],
   });
 
   await hre.run("verify:verify", {
-    address: contracts.joyGotchiStakingAndMining,
+    address: contracts.raiGotchiStakingAndMining,
     constructorArguments: [
-      contracts.joyGotchiV2,
-      contracts.joyGotchiItems,
+      contracts.raiGotchiV2,
+      contracts.raiGotchiItems,
       contracts.token,
-      contracts.joyGotchiTreasury,
+      contracts.raiGotchiTreasury,
     ],
   });
 }

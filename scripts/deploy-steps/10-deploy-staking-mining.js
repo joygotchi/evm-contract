@@ -9,24 +9,24 @@ async function main() {
   console.log("Deploying contracts with the account:", deployer.address);
 
   // Deploy Token contract
-  const JoyGotchiStakingAndMining = await hre.ethers.getContractFactory(
-    "JoyGotchiStakingAndMining"
+  const RaiGotchiStakingAndMining = await hre.ethers.getContractFactory(
+    "RaiGotchiStakingAndMining"
   );
-  const joyGotchiStakingAndMining = await JoyGotchiStakingAndMining.deploy(
-    contracts.joyGotchiV2,
-    contracts.joyGotchiItems,
+  const raiGotchiStakingAndMining = await RaiGotchiStakingAndMining.deploy(
+    contracts.raiGotchiV2,
+    contracts.raiGotchiItems,
     contracts.token,
-    contracts.joyGotchiTreasury
+    contracts.raiGotchiTreasury
   );
-  await joyGotchiStakingAndMining.waitForDeployment();
-  console.log("JoyGotchiStakingAndMining:", joyGotchiStakingAndMining.target);
+  await raiGotchiStakingAndMining.waitForDeployment();
+  console.log("RaiGotchiStakingAndMining:", raiGotchiStakingAndMining.target);
 
   saveContract(
     network,
-    "joyGotchiStakingAndMining",
-    joyGotchiStakingAndMining.target
+    "raiGotchiStakingAndMining",
+    raiGotchiStakingAndMining.target
   );
-  console.log("JoyGotchiStakingAndMining contract saved");
+  console.log("RaiGotchiStakingAndMining contract saved");
 }
 
 main()

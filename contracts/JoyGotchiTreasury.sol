@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 import "./interfaces/IToken.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract JoyGotchiTreasury is Ownable {
+contract RaiGotchiTreasury is Ownable {
     IToken public token;
 
     constructor(address _token) {

@@ -8,23 +8,23 @@ async function main() {
 
   console.log("Deploying contracts with the account:", deployer.address);
 
-  const JoyGotchiImmidiateUseItems = await hre.ethers.getContractFactory(
-    "JoyGotchiImmidiateUseItems"
+  const RaiGotchiImmidiateUseItems = await hre.ethers.getContractFactory(
+    "RaiGotchiImmidiateUseItems"
   );
-  const joyGotchiImmidiateUseItems = await JoyGotchiImmidiateUseItems.deploy(
-    contracts.joyGotchiV2,
-    contracts.joyGotchiTreasury,
+  const raiGotchiImmidiateUseItems = await RaiGotchiImmidiateUseItems.deploy(
+    contracts.raiGotchiV2,
+    contracts.raiGotchiTreasury,
     contracts.token
   );
-  await joyGotchiImmidiateUseItems.waitForDeployment();
-  console.log("JoyGotchiImmidiateUseItems:", joyGotchiImmidiateUseItems.target);
+  await raiGotchiImmidiateUseItems.waitForDeployment();
+  console.log("RaiGotchiImmidiateUseItems:", raiGotchiImmidiateUseItems.target);
 
   saveContract(
     network,
-    "joyGotchiImmidiateUseItems",
-    joyGotchiImmidiateUseItems.target
+    "raiGotchiImmidiateUseItems",
+    raiGotchiImmidiateUseItems.target
   );
-  console.log("JoyGotchiImmidiateUseItems contract saved");
+  console.log("RaiGotchiImmidiateUseItems contract saved");
 }
 
 main()

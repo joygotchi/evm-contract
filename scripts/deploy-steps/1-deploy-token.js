@@ -9,16 +9,16 @@ async function main() {
   console.log("Deploying contracts with the account:", deployer.address);
 
   // Deploy Token contract
-  const Token = await hre.ethers.getContractFactory("JoyGotchiToken");
+  const Token = await hre.ethers.getContractFactory("RaiGotchiToken");
   const token = await Token.deploy(contracts.uniswapV2Router02);
   await token.waitForDeployment();
-  console.log("JoyGotchiToken:", token);
+  console.log("RaiGotchiToken:", token);
 
   saveContract(network, "token", token);
   console.log("Token contract saved");
 
   // Settings
-  await token.transfer(contracts.joyGotchiFaucet, ethers.parseEther("1000000"));
+  await token.transfer(contracts.raiGotchiFaucet, ethers.parseEther("1000000"));
   console.log("Transfer token to faucet success");
   await token.enableTrading();
   console.log("Enable trading success");

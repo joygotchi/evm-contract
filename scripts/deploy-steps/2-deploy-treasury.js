@@ -8,15 +8,15 @@ async function main() {
 
   console.log("Deploying contracts with the account:", deployer.address);
 
-  const JoyGotchiTreasury = await hre.ethers.getContractFactory(
-    "JoyGotchiTreasury"
+  const RaiGotchiTreasury = await hre.ethers.getContractFactory(
+    "RaiGotchiTreasury"
   );
-  const joyGotchiTreasury = await JoyGotchiTreasury.deploy(contracts.token);
-  await joyGotchiTreasury.waitForDeployment();
-  console.log("JoyGotchiTreasury:", joyGotchiTreasury.target);
+  const raiGotchiTreasury = await RaiGotchiTreasury.deploy(contracts.token);
+  await raiGotchiTreasury.waitForDeployment();
+  console.log("RaiGotchiTreasury:", raiGotchiTreasury.target);
 
-  saveContract(network, "joyGotchiTreasury", joyGotchiTreasury.target);
-  console.log("JoyGotchiTreasury contract saved");
+  saveContract(network, "raiGotchiTreasury", raiGotchiTreasury.target);
+  console.log("RaiGotchiTreasury contract saved");
 }
 
 main()

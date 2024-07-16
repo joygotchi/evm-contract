@@ -2,15 +2,15 @@
 
 pragma solidity ^0.8.17;
 
-import "./interfaces/IJoyGotchi.sol";
-import "./interfaces/IJoyGotchiItem.sol";
+import "./interfaces/IRaiGotchi.sol";
+import "./interfaces/IRaiGotchiItem.sol";
 import "./interfaces/IToken.sol";
-import "./helper/JoyGotchiEnum.sol";
+import "./helper/RaiGotchiEnum.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract JoyGotchiStakingAndMining is Ownable {
-    IJoyGotchi public joyGotchiNFT;
-    IJoyGotchiItem public joyGotchiNFTItem;
+contract RaiGotchiStakingAndMining is Ownable {
+    IRaiGotchi public raiGotchiNFT;
+    IRaiGotchiItem public raiGotchiNFTItem;
     IToken public token;
     address public treasury;
 
@@ -77,31 +77,31 @@ contract JoyGotchiStakingAndMining is Ownable {
     event PointsRedemed(address owner, uint256 prototypeTokenIds);
 
     constructor(
-        address _joyGotchiNFT,
-        address _joyGotchiNFTItem,
+        address _raiGotchiNFT,
+        address _raiGotchiNFTItem,
         address _token,
         address _treasury
     ) {
-        joyGotchiNFT = IJoyGotchi(_joyGotchiNFT);
-        joyGotchiNFTItem = IJoyGotchiItem(_joyGotchiNFTItem);
+        raiGotchiNFT = IRaiGotchi(_raiGotchiNFT);
+        raiGotchiNFTItem = IRaiGotchiItem(_raiGotchiNFTItem);
         token = IToken(_token);
         treasury = _treasury;
         pricePerSlot = 35 ether;
     }
 
-    modifier isApprovedJoyGotchiNFT(uint256 id) {
+    modifier isApprovedraiGotchiNFT(uint256 id) {
         require(
-            joyGotchiNFT.ownerOf(id) == msg.sender ||
-                joyGotchiNFT.getApproved(id) == msg.sender,
+            raiGotchiNFT.ownerOf(id) == msg.sender ||
+                raiGotchiNFT.getApproved(id) == msg.sender,
             "Not approved"
         );
         _;
     }
 
-    modifier isApprovedJoyGotchiNFTItem(uint256 id) {
+    modifier isApprovedraiGotchiNFTItem(uint256 id) {
         require(
-            joyGotchiNFTItem.ownerOf(id) == msg.sender ||
-                joyGotchiNFTItem.getApproved(id) == msg.sender,
+            raiGotchiNFTItem.ownerOf(id) == msg.sender ||
+                raiGotchiNFTItem.getApproved(id) == msg.sender,
             "Item not approved"
         );
         _;
@@ -118,7 +118,7 @@ contract JoyGotchiStakingAndMining is Ownable {
     ) public onlyOwner {
         for (uint i = 0; i < _rewardNFTIds.length; i++) {
             require(
-                _rewardNFTIds[i] < joyGotchiNFTItem.totalPrototypeItems(),
+                _rewardNFTIds[i] < raiGotchiNFTItem.totalPrototypeItems(),
                 "NFT ID not exist"
             );
         }
@@ -165,7 +165,7 @@ contract JoyGotchiStakingAndMining is Ownable {
     function stake(
         uint256 _nftId,
         uint256 _poolId
-    ) public isApprovedJoyGotchiNFT(_nftId) {
+    ) public isApprovedraiGotchiNFT(_nftId) {
         PoolInfo storage pool = poolInfo[_poolId];
 
         require(_poolId < poolIds, "Pool ID not exist");
@@ -186,12 +186,12 @@ contract JoyGotchiStakingAndMining is Ownable {
         );
 
         require(
-            joyGotchiNFT.isPetAlive(_nftId),
+            raiGotchiNFT.isPetAlive(_nftId),
             "Your pet is dead, you cannot stake it"
         );
 
         require(
-            joyGotchiNFT.isPetLocked(_nftId) == false,
+            raiGotchiNFT.isPetLocked(_nftId) == false,
             "Your pet is locked, you cannot stake it"
         );
 
@@ -203,7 +203,7 @@ contract JoyGotchiStakingAndMining is Ownable {
 
         stakedPetOwner[_nftId] = msg.sender;
 
-        joyGotchiNFT.lockPet(_nftId);
+        raiGotchiNFT.lockPet(_nftId);
 
         emit PetStaked(_nftId, _poolId);
     }
@@ -218,7 +218,7 @@ contract JoyGotchiStakingAndMining is Ownable {
         require(_stakedPetOwner == msg.sender, "Not pet owner");
 
         require(
-            joyGotchiNFT.isPetLocked(_nftId),
+            raiGotchiNFT.isPetLocked(_nftId),
             "Your pet is not locked, you cannot unstake it"
         );
 
@@ -228,13 +228,13 @@ contract JoyGotchiStakingAndMining is Ownable {
         );
 
         for (uint i = 0; i < pool.rewardNFTIds.length; i++) {
-            joyGotchiNFTItem.mint(_stakedPetOwner, pool.rewardNFTIds[i]);
+            raiGotchiNFTItem.mint(_stakedPetOwner, pool.rewardNFTIds[i]);
         }
 
         stakedPetOwner[_nftId] = address(0);
 
         token.transfer(_stakedPetOwner, pool.tokenRewardPerSlot);
-        joyGotchiNFT.unlockPet(_nftId);
+        raiGotchiNFT.unlockPet(_nftId);
 
         emit PetUnstaked(
             _nftId,
@@ -246,9 +246,9 @@ contract JoyGotchiStakingAndMining is Ownable {
 
     function addMiningTool(
         uint256 _toolId
-    ) public isApprovedJoyGotchiNFTItem(_toolId) {
+    ) public isApprovedraiGotchiNFTItem(_toolId) {
         require(
-            joyGotchiNFTItem.itemType(_toolId) == ItemType.MINETOOL,
+            raiGotchiNFTItem.itemType(_toolId) == ItemType.MINETOOL,
             "This item is not a mining tool"
         );
 
@@ -263,13 +263,13 @@ contract JoyGotchiStakingAndMining is Ownable {
         );
 
         require(
-            joyGotchiNFTItem.isItemLock(_toolId) == false,
+            raiGotchiNFTItem.isItemLock(_toolId) == false,
             "This tool is locked"
         );
 
-        joyGotchiNFTItem.lockItem(_toolId);
+        raiGotchiNFTItem.lockItem(_toolId);
 
-        uint256 miningPower = joyGotchiNFTItem.miningPower(_toolId);
+        uint256 miningPower = raiGotchiNFTItem.miningPower(_toolId);
 
         miningToolUsed[msg.sender].push(_toolId);
 
@@ -295,9 +295,9 @@ contract JoyGotchiStakingAndMining is Ownable {
             "You are not the owner of this tool"
         );
 
-        joyGotchiNFTItem.unlockItem(_toolId);
+        raiGotchiNFTItem.unlockItem(_toolId);
 
-        uint256 miningPower = joyGotchiNFTItem.miningPower(_toolId);
+        uint256 miningPower = raiGotchiNFTItem.miningPower(_toolId);
 
         totalMiningPower[msg.sender] -= miningPower;
 
@@ -347,12 +347,12 @@ contract JoyGotchiStakingAndMining is Ownable {
 
         miningPoints[msg.sender] -= pointsUsedPerRedemn;
 
-        uint256 prototypeTokenId = joyGotchiNFTItem.getPrototypeForNewItem(
+        uint256 prototypeTokenId = raiGotchiNFTItem.getPrototypeForNewItem(
             msg.sender,
             _miningPoints
         );
 
-        joyGotchiNFTItem.mint(msg.sender, prototypeTokenId);
+        raiGotchiNFTItem.mint(msg.sender, prototypeTokenId);
 
         token.transfer(msg.sender, tokenEarnedPerRedemn);
 
@@ -411,16 +411,16 @@ contract JoyGotchiStakingAndMining is Ownable {
         uint256 numberOfTools
     ) private view returns (uint256) {
         if (numberOfTools == 1) {
-            uint256 _chargeOfTime = joyGotchiNFTItem.miningChargeTime(
+            uint256 _chargeOfTime = raiGotchiNFTItem.miningChargeTime(
                 miningToolUsed[msg.sender][0]
             );
             return _chargeOfTime;
         } else if (numberOfTools == 2) {
-            uint256 firstToolChargeTime = joyGotchiNFTItem.miningChargeTime(
+            uint256 firstToolChargeTime = raiGotchiNFTItem.miningChargeTime(
                 miningToolUsed[msg.sender][0]
             );
 
-            uint256 secondToolChargeTime = joyGotchiNFTItem.miningChargeTime(
+            uint256 secondToolChargeTime = raiGotchiNFTItem.miningChargeTime(
                 miningToolUsed[msg.sender][1]
             );
 
@@ -429,7 +429,7 @@ contract JoyGotchiStakingAndMining is Ownable {
                 ? miningToolUsed[msg.sender][0]
                 : miningToolUsed[msg.sender][1];
 
-            uint256 _reducedChargeTime = joyGotchiNFTItem.miningChargeTime(
+            uint256 _reducedChargeTime = raiGotchiNFTItem.miningChargeTime(
                 shorterChargeTimeToolId
             ) / 2;
 
@@ -437,15 +437,15 @@ contract JoyGotchiStakingAndMining is Ownable {
             return
                 firstToolChargeTime + secondToolChargeTime - _reducedChargeTime;
         } else {
-            uint256 firstToolChargeTime = joyGotchiNFTItem.miningChargeTime(
+            uint256 firstToolChargeTime = raiGotchiNFTItem.miningChargeTime(
                 miningToolUsed[msg.sender][0]
             );
 
-            uint256 secondToolChargeTime = joyGotchiNFTItem.miningChargeTime(
+            uint256 secondToolChargeTime = raiGotchiNFTItem.miningChargeTime(
                 miningToolUsed[msg.sender][1]
             );
 
-            uint256 thirdToolChargeTime = joyGotchiNFTItem.miningChargeTime(
+            uint256 thirdToolChargeTime = raiGotchiNFTItem.miningChargeTime(
                 miningToolUsed[msg.sender][2]
             );
 
@@ -454,12 +454,12 @@ contract JoyGotchiStakingAndMining is Ownable {
                 ? miningToolUsed[msg.sender][0]
                 : miningToolUsed[msg.sender][1];
 
-            uint256 shortestChargeTimeToolId = joyGotchiNFTItem
+            uint256 shortestChargeTimeToolId = raiGotchiNFTItem
                 .miningChargeTime(shorterChargeTimeToolId) < thirdToolChargeTime
                 ? shorterChargeTimeToolId
                 : miningToolUsed[msg.sender][2];
 
-            uint256 _reducedChargeTime = joyGotchiNFTItem.miningChargeTime(
+            uint256 _reducedChargeTime = raiGotchiNFTItem.miningChargeTime(
                 shortestChargeTimeToolId
             );
 

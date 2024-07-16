@@ -2,13 +2,13 @@
 
 pragma solidity ^0.8.17;
 
-import "./interfaces/IJoyGotchi.sol";
+import "./interfaces/IRaiGotchi.sol";
 import "./interfaces/IToken.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract JoyGotchiImmidiateUseItems is Ownable {
-    IJoyGotchi public joyGotchiNFT;
+contract RaiGotchiImmidiateUseItems is Ownable {
+    IRaiGotchi public raiGotchiNFT;
     IToken public token;
     address public treasury;
 
@@ -39,16 +39,16 @@ contract JoyGotchiImmidiateUseItems is Ownable {
 
     event ItemConsumed(uint256 nftId, address giver, uint256 itemId);
 
-    constructor(address _joyGotchiNFT, address _treasury, address _token) {
-        joyGotchiNFT = IJoyGotchi(_joyGotchiNFT);
+    constructor(address _raiGotchiNFT, address _treasury, address _token) {
+        raiGotchiNFT = IRaiGotchi(_raiGotchiNFT);
         treasury = _treasury;
         token = IToken(_token);
     }
 
     modifier isApproved(uint256 id) {
         require(
-            joyGotchiNFT.ownerOf(id) == msg.sender ||
-                joyGotchiNFT.getApproved(id) == msg.sender,
+            raiGotchiNFT.ownerOf(id) == msg.sender ||
+                raiGotchiNFT.getApproved(id) == msg.sender,
             "Not approved"
         );
         _;
@@ -86,8 +86,8 @@ contract JoyGotchiImmidiateUseItems is Ownable {
     ) external payable isApproved(nftId) {
         require(itemExists(itemId), "This item doesn't exist");
         require(
-            joyGotchiNFT.isPetAlive(nftId) ||
-                (!joyGotchiNFT.isPetAlive(nftId) && itemIsRevival[itemId]),
+            raiGotchiNFT.isPetAlive(nftId) ||
+                (!raiGotchiNFT.isPetAlive(nftId) && itemIsRevival[itemId]),
             "pet dead or not revival item"
         ); //no revives
         require(itemStock[itemId] > 0, "Out of stock");
@@ -96,21 +96,21 @@ contract JoyGotchiImmidiateUseItems is Ownable {
 
         uint256 amount = itemPrice[itemId];
 
-        joyGotchiNFT.onComsumeImmidiateUseItem(
+        raiGotchiNFT.onComsumeImmidiateUseItem(
             nftId,
             itemTimeExtension[itemId],
             itemShield[itemId]
         );
 
-        joyGotchiNFT.addPetScoreAfterUsedItem(nftId, itemPoints[itemId]);
+        raiGotchiNFT.addPetScoreAfterUsedItem(nftId, itemPoints[itemId]);
 
         itemPrice[itemId] += itemPriceDelta[itemId];
         itemStock[itemId] -= 1;
 
         token.transferFrom(msg.sender, treasury, amount);
 
-        joyGotchiNFT.getWalletSeedAndUpdateIfNeeded();
-        joyGotchiNFT.checkPetEvoleAndUpdateIfNeeded(nftId);
+        raiGotchiNFT.getWalletSeedAndUpdateIfNeeded();
+        raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(nftId);
 
         emit ItemConsumed(nftId, msg.sender, itemId);
     }

@@ -8,12 +8,12 @@ async function main() {
 
   console.log("Deploying contracts with the account:", deployer.address);
 
-  const Faucet = await hre.ethers.getContractFactory("JoyGotchiFaucet");
+  const Faucet = await hre.ethers.getContractFactory("RaiGotchiFaucet");
   const faucet = await Faucet.deploy(contracts.token);
   await faucet.waitForDeployment();
   console.log("Faucet:", faucet.target);
 
-  saveContract(network, "joyGotchiFaucet", faucet.target);
+  saveContract(network, "raiGotchiFaucet", faucet.target);
   console.log("Faucet contract saved");
 }
 

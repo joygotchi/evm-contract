@@ -38,12 +38,12 @@ contract GenePool is Ownable {
     event SpeciesCreated(uint256 id, uint256 speciesMaxPopulation);
 
     constructor(
-        address _joyGotchiNFT,
+        address _raiGotchiNFT,
         uint256 _skinColorGeneNum,
         uint256 _hornStyleGeneNum,
         uint256 _wingStyleGeneNum
     ) {
-        nft = _joyGotchiNFT;
+        nft = _raiGotchiNFT;
         skinColorGeneNum = _skinColorGeneNum;
         hornStyleGeneNum = _hornStyleGeneNum;
         wingStyleGeneNum = _wingStyleGeneNum;
