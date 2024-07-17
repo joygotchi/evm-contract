@@ -198,13 +198,13 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
 
         token.transferFrom(msg.sender, treasury, pool.tokenRewardPerSlot);
 
+        raiGotchiNFT.lockPet(_nftId);
+
         userStakedPetCount[msg.sender][_poolId]++;
 
         poolInfo[_poolId].totalStakedSlot++;
 
         stakedPetOwner[_nftId] = msg.sender;
-
-        raiGotchiNFT.lockPet(_nftId);
 
         emit PetStaked(_nftId, _poolId);
     }
@@ -296,8 +296,6 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
             "You are not the owner of this tool"
         );
 
-        raiGotchiNFTItem.unlockItem(_toolId);
-
         uint256 miningPower = raiGotchiNFTItem.miningPower(_toolId);
 
         totalMiningPower[msg.sender] -= miningPower;
@@ -309,6 +307,8 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
         totalMiningChargeTime[msg.sender] = _caculateChargeOfTime(
             miningToolUsed[msg.sender].length
         );
+
+        raiGotchiNFTItem.unlockItem(_toolId);
 
         emit MiningToolRemoved(_toolId, msg.sender);
     }

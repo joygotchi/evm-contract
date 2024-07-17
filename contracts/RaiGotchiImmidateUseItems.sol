@@ -97,6 +97,11 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
 
         uint256 amount = itemPrice[itemId];
 
+        itemPrice[itemId] += itemPriceDelta[itemId];
+        itemStock[itemId] -= 1;
+
+        token.transferFrom(msg.sender, treasury, amount);
+
         raiGotchiNFT.onComsumeImmidiateUseItem(
             nftId,
             itemTimeExtension[itemId],
@@ -104,11 +109,6 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         );
 
         raiGotchiNFT.addPetScoreAfterUsedItem(nftId, itemPoints[itemId]);
-
-        itemPrice[itemId] += itemPriceDelta[itemId];
-        itemStock[itemId] -= 1;
-
-        token.transferFrom(msg.sender, treasury, amount);
 
         raiGotchiNFT.getWalletSeedAndUpdateIfNeeded();
         raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(nftId);
