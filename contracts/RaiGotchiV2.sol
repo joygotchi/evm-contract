@@ -345,21 +345,16 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
     function setPetInfoAfterAttack(
         uint256 winnerId,
         uint256 loserId,
-        uint256 _score
+        uint256 _score,
+        uint256 _debt
     ) external whenNotPaused {
         require(msg.sender == attackContract, "Not authorized");
 
         petScore[loserId] -= _score;
-        petRewardDebt[loserId] = petScore[loserId].mulDivDown(
-            ethAccPerShare,
-            PRECISION
-        );
+        petRewardDebt[loserId] -= _debt;
 
         petScore[winnerId] += _score;
-        petRewardDebt[winnerId] = petScore[winnerId].mulDivDown(
-            ethAccPerShare,
-            PRECISION
-        );
+        petRewardDebt[winnerId] += _debt;
     }
 
     function lockPet(uint256 _nftId) external isAuthorized whenNotPaused {

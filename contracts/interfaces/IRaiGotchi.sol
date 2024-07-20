@@ -74,7 +74,8 @@ interface IRaiGotchi {
     function setPetInfoAfterAttack(
         uint256 winnerId,
         uint256 loserId,
-        uint256 _score
+        uint256 _score,
+        uint256 _debt
     ) external;
 
         function onComsumeImmidiateUseItem(

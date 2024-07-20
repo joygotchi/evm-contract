@@ -24,7 +24,8 @@ contract RaiGotchiAttack is Ownable, Pausable {
         uint256 attacker,
         uint256 winner,
         uint256 loser,
-        uint256 scoresWon
+        uint256 scoresWon,
+        uint256 prizeDebt
     );
 
     event AttackBlocked(uint256 fromId, uint256 toId);
@@ -72,15 +73,16 @@ contract RaiGotchiAttack is Ownable, Pausable {
         (
             uint256 winner,
             uint256 loser,
-            uint256 prizeScore
+            uint256 prizeScore,
+            uint256 prizeDebt
         ) = _caculateOddsAndDeclareWinner(fromId, toId, pct, odds);
 
-        raiGotchiNFT.setPetInfoAfterAttack(winner, loser, prizeScore);
+        raiGotchiNFT.setPetInfoAfterAttack(winner, loser, prizeScore, prizeDebt);
 
         raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(fromId);
         raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(toId);
 
-        emit Attack(fromId, winner, loser, prizeScore);
+        emit Attack(fromId, winner, loser, prizeScore, prizeDebt);
     }
 
     function onAttack(
@@ -116,7 +118,7 @@ contract RaiGotchiAttack is Ownable, Pausable {
         uint256 toId,
         uint256 pct,
         uint256 odds
-    ) internal returns (uint256 winner, uint256 loser, uint256 prizeScore) {
+    ) internal returns (uint256 winner, uint256 loser, uint256 prizeScore, uint256 prizeDebt) {
         // Random a number from 0 to 100 to determine the winner
         uint256 _random = random(fromId + toId) % 101;
         // If the random number is greater than the odds of winning, the attacker loses
@@ -186,6 +188,11 @@ contract RaiGotchiAttack is Ownable, Pausable {
                 }
             }
         }
+
+        prizeDebt = raiGotchiNFT.petRewardDebt(loser).mulDivDown(
+            feePercentage,
+            PRECISION
+        );
     }
 
     function random(uint256 seed) private returns (uint) {
