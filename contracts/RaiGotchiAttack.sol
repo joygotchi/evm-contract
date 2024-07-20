@@ -70,14 +70,21 @@ contract RaiGotchiAttack is Ownable, Pausable {
         lastAttackUsed[fromId] = block.timestamp;
         lastAttacked[toId] = block.timestamp;
 
+        uint256 feePercentage = PRECISION.mulDivDown(pct, 1000); // 0.5 pct
+
         (
             uint256 winner,
             uint256 loser,
             uint256 prizeScore,
             uint256 prizeDebt
-        ) = _caculateOddsAndDeclareWinner(fromId, toId, pct, odds);
+        ) = _caculateOddsAndDeclareWinner(fromId, toId, feePercentage, odds);
 
-        raiGotchiNFT.setPetInfoAfterAttack(winner, loser, prizeScore, prizeDebt);
+        raiGotchiNFT.setPetInfoAfterAttack(
+            winner,
+            loser,
+            prizeScore,
+            prizeDebt
+        );
 
         raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(fromId);
         raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(toId);
@@ -116,9 +123,17 @@ contract RaiGotchiAttack is Ownable, Pausable {
     function _caculateOddsAndDeclareWinner(
         uint256 fromId,
         uint256 toId,
-        uint256 pct,
+        uint256 feePercentage,
         uint256 odds
-    ) internal returns (uint256 winner, uint256 loser, uint256 prizeScore, uint256 prizeDebt) {
+    )
+        internal
+        returns (
+            uint256 winner,
+            uint256 loser,
+            uint256 prizeScore,
+            uint256 prizeDebt
+        )
+    {
         // Random a number from 0 to 100 to determine the winner
         uint256 _random = random(fromId + toId) % 101;
         // If the random number is greater than the odds of winning, the attacker loses
@@ -129,8 +144,6 @@ contract RaiGotchiAttack is Ownable, Pausable {
             winner = fromId;
             loser = toId;
         }
-
-        uint256 feePercentage = PRECISION.mulDivDown(pct, 1000); // 0.5 pct
 
         uint256 targetMaxLoss = raiGotchiNFT.petScore(toId).mulDivDown(
             feePercentage,
