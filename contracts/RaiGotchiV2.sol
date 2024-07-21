@@ -759,6 +759,12 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         uint256 currentEvoPhase
     ) private view returns (uint256) {
         uint256 _species = petSpecies[_nftId];
+        uint256 _speciesMaxEvolutionPhase = genePool.speciesMaxEvolutionPhase(
+            _species
+        );
+        if (currentEvoPhase == _speciesMaxEvolutionPhase) {
+            return _speciesMaxEvolutionPhase;
+        }
         uint256 evoLevel = genePool
             .getSpeciesEvolutionPhaseInfo(_species, currentEvoPhase)
             .nextEvolutionLevel;
