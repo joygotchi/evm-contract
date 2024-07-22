@@ -232,6 +232,8 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
 
         petAccessories[_nftId].push(_itemId);
 
+        _evolvePetIfNeeded(_nftId);
+
         emit AccessoryAdded(_nftId, _itemId);
     }
 
@@ -267,6 +269,8 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
             PRECISION
         );
 
+        _evolvePetIfNeeded(_nftId);
+
         emit AccessoryRemoved(_nftId, _itemId);
     }
 
@@ -297,6 +301,7 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
             PRECISION
         );
         totalScores += _score;
+        _evolvePetIfNeeded(_nftId);
     }
 
     function createNewPetAfterBreed(

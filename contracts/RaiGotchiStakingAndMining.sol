@@ -198,6 +198,8 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
 
         token.transferFrom(msg.sender, treasury, pool.tokenRewardPerSlot);
 
+        raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(_nftId);
+
         raiGotchiNFT.lockPet(_nftId);
 
         userStakedPetCount[msg.sender][_poolId]++;

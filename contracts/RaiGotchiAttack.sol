@@ -60,6 +60,9 @@ contract RaiGotchiAttack is Ownable, Pausable {
             emit AttackBlocked(fromId, toId);
             return;
         }
+        
+        raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(fromId);
+        raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(toId);
 
         (uint256 pct, uint256 odds, bool canAttack) = onAttack(fromId, toId);
 
@@ -85,9 +88,6 @@ contract RaiGotchiAttack is Ownable, Pausable {
             prizeScore,
             prizeDebt
         );
-
-        raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(fromId);
-        raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(toId);
 
         emit Attack(fromId, winner, loser, prizeScore, prizeDebt);
     }
