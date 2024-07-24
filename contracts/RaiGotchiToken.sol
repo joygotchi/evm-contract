@@ -9,7 +9,6 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {SafeTransferLib} from "solmate/src/utils/SafeTransferLib.sol";
 
-
 interface IUniswapV2Factory {
     event PairCreated(
         address indexed token0,
@@ -280,10 +279,10 @@ contract RaiGotchiToken is ERC20, Ownable, ERC20Burnable {
         uint256 tokensIntoLiquidity
     );
 
-    constructor(address _routerAddress) ERC20("Rai Gotchi Token", "JGT") {
+    constructor(address _routerAddress) ERC20("Rai Gotchi Token", "RGT") {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
             _routerAddress
-        ); 
+        );
 
         excludeFromMaxTransaction(address(_uniswapV2Router), true);
         uniswapV2Router = _uniswapV2Router;
@@ -370,12 +369,10 @@ contract RaiGotchiToken is ERC20, Ownable, ERC20Burnable {
     }
 
     function updateMaxTxnAmount(uint256 newNum) external onlyOwner {
-
         maxTransactionAmount = newNum * (10 ** 18);
     }
 
     function updateMaxWalletAmount(uint256 newNum) external onlyOwner {
-
         maxWallet = newNum * (10 ** 18);
     }
 

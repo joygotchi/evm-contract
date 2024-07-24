@@ -195,11 +195,12 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         }
 
         _burn(_deadId);
+        uint256 pending = pendingEth(_deadId);
         // redeem for dead pet
         _redeem(_deadId, ownerOfDead);
         _getWalletSeedAndUpdateIfNeeded();
 
-        emit PetKilled(_deadId, petName[_deadId], 1, msg.sender);
+        emit PetKilled(_deadId, petName[_deadId], pending, msg.sender);
     }
 
     function addAccessoryToPet(
@@ -220,10 +221,6 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         require(raiGotchiNFTItem.isItemLock(_itemId), "Item is locked");
 
         raiGotchiNFTItem.lockItem(_itemId);
-
-        uint256 _itemPoints = raiGotchiNFTItem.itemPoints(_itemId);
-
-        petScore[_nftId] += _itemPoints;
 
         petRewardDebt[_nftId] = petScore[_nftId].mulDivDown(
             ethAccPerShare,
@@ -259,10 +256,6 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         }
 
         require(isItemFound, "Item not added to pet");
-
-        uint256 _itemPoints = raiGotchiNFTItem.itemPoints(_itemId);
-
-        petScore[_nftId] -= _itemPoints;
 
         petRewardDebt[_nftId] = petScore[_nftId].mulDivDown(
             ethAccPerShare,
