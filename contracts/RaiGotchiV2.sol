@@ -193,11 +193,15 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         ) {
             genePool.reducePopulationAndAddSpeciesToGenePool(speciesOfDead);
         }
-
+        
         _burn(_deadId);
         uint256 pending = pendingEth(_deadId);
         // redeem for dead pet
         _redeem(_deadId, ownerOfDead);
+
+        totalScores -= petScore[_deadId];
+        petScore[_deadId] = 0;
+
         _getWalletSeedAndUpdateIfNeeded();
 
         emit PetKilled(_deadId, petName[_deadId], pending, msg.sender);
@@ -676,10 +680,11 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
     function _redeem(uint256 petId, address _to) internal {
         uint256 pending = pendingEth(petId);
 
-        totalScores -= petScore[petId];
-        petScore[petId] = 0;
         ethOwed[petId] = 0;
-        petRewardDebt[petId] = 0;
+        petRewardDebt[petId] = petScore[petId].mulDivDown(
+            ethAccPerShare,
+            PRECISION
+        );
 
         payable(_to).safeTransferETH(pending);
 
