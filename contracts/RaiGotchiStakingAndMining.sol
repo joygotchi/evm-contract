@@ -90,7 +90,7 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
         pricePerSlot = 35 ether;
     }
 
-    modifier isApprovedraiGotchiNFT(uint256 id) {
+    modifier isApprovedRaiGotchiNFT(uint256 id) {
         require(
             raiGotchiNFT.ownerOf(id) == msg.sender ||
                 raiGotchiNFT.getApproved(id) == msg.sender,
@@ -166,7 +166,7 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
     function stake(
         uint256 _nftId,
         uint256 _poolId
-    ) public isApprovedraiGotchiNFT(_nftId) whenNotPaused {
+    ) public isApprovedRaiGotchiNFT(_nftId) whenNotPaused {
         PoolInfo storage pool = poolInfo[_poolId];
 
         require(_poolId < poolIds, "Pool ID not exist");
@@ -362,7 +362,9 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
         emit PointsRedemed(msg.sender, prototypeTokenId);
     }
 
-    function ownerWithdrawRedundantToken(uint256 _poolId) public onlyOwner whenNotPaused {
+    function ownerWithdrawRedundantToken(
+        uint256 _poolId
+    ) public onlyOwner whenNotPaused {
         PoolInfo memory pool = poolInfo[_poolId];
 
         require(
@@ -390,7 +392,7 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
         chargeOfTimeMultiplier = _chargeOfTimeMultiplier;
     }
 
-    function setMiningPointsUsedPerRedemn(uint256 _points) public onlyOwner  {
+    function setMiningPointsUsedPerRedemn(uint256 _points) public onlyOwner {
         pointsUsedPerRedemn = _points;
     }
 

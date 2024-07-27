@@ -88,7 +88,7 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
         _;
     }
 
-    modifier isApprovedraiGotchiNFT(uint256 id) {
+    modifier isApprovedRaiGotchiNFT(uint256 id) {
         require(
             raiGotchiNFT.ownerOf(id) == msg.sender ||
                 raiGotchiNFT.getApproved(id) == msg.sender,
@@ -169,7 +169,7 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
     function mintPetCard(
         address _to,
         uint256 _petId
-    ) public isApprovedraiGotchiNFT(_petId) whenNotPaused {
+    ) public isApprovedRaiGotchiNFT(_petId) whenNotPaused {
         require(!isPetMintToCard[_petId], "Pet card already minted");
         uint256 speciesId = raiGotchiNFT.petSpecies(_petId);
         uint256 currentTokenId = totalItems;
