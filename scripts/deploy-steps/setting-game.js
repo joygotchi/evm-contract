@@ -23,8 +23,6 @@ async function main() {
     contracts.raiGotchiImmidiateUseItems
   );
   console.log("Set ImmidiateUseItemsContract success");
-  await raiGotchiV2.setRaiGotchiItemsContract(contracts.raiGotchiItems);
-  console.log("Set RaiGotchiItemsContract success");
 }
 
 main()

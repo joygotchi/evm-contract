@@ -148,14 +148,10 @@ async function main() {
     raiGotchiImmidiateUseItems.target
   );
   console.log("Set ImmidiateUseItemsContract success");
-  await raiGotchiV2.setRaiGotchiItemsContract(raiGotchiItems.target);
-  console.log("Set RaiGotchiItemsContract success");
 
   // Settings allow contract to mint NFT for RaiGotchiItems contract
   await raiGotchiItems.setAllowAddress(raiGotchiV2.target, true);
   console.log("Allow RaiGotchiV2 for NFT items success");
-  await raiGotchiItems.setAllowAddress(raiGotchiBreed.target, true);
-  console.log("Allow RaiGotchiBreed for NFT items success");
   await raiGotchiItems.setAllowAddress(raiGotchiStakingAndMining.target, true);
   console.log("Allow RaiGotchiStakingAndMining for NFT items success");
 

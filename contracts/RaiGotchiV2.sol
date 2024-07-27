@@ -25,7 +25,6 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
 
     IToken public token;
     IGenePool public genePool;
-    IRaiGotchiItem public raiGotchiNFTItem;
 
     address public breedContract;
     address public stakingAndMiningContract;
@@ -652,12 +651,6 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
 
     function setGenePool(address _genePool) external onlyOwner {
         genePool = IGenePool(_genePool);
-    }
-
-    function setRaiGotchiItemsContract(
-        address _raiGotchiNFTItem
-    ) external onlyOwner {
-        raiGotchiNFTItem = IRaiGotchiItem(_raiGotchiNFTItem);
     }
 
     function setImmidiateUseItemsContract(
