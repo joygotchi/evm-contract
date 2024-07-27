@@ -252,6 +252,11 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
         ] = _prototypeItemminingChargeTime;
     }
 
+    /**
+        @notice Keep in mind that each time new species is created in gene pool, this function should be invoke by owner
+        In order to keep the consistency between species contracts and items contract
+        Or else the pet card will not be able to mint
+    */
     function addSpeciesAttackAndDefensePoints(
         uint256 _attackPoints,
         uint256 _defensePoints
