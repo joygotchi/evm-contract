@@ -183,6 +183,15 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
         petStar[currentTokenId] = 1;
         _mint(_to, totalItems);
         totalItems++;
+
+        emit PetCardMinted(
+            currentTokenId,
+            _to,
+            speciesId,
+            speciesAttackPoints[speciesId],
+            speciesDefensePoints[speciesId],
+            1
+        );
     }
 
     function lockItem(uint256 _tokenId) public isValid whenNotPaused {
