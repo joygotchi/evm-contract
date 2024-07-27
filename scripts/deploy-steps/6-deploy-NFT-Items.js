@@ -17,8 +17,6 @@ async function main() {
   console.log("RaiGotchiItems contract saved");
 
   // Settings allow contract to mint NFT for RaiGotchiItems contract
-  await raiGotchiItems.setAllowAddress(contracts.raiGotchiV2, true);
-  console.log("Allow RaiGotchiV2 for NFT items success");
   await raiGotchiItems.setAllowAddress(
     contracts.raiGotchiStakingAndMining,
     true

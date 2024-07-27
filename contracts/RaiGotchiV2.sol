@@ -9,7 +9,6 @@ import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {IGenePool} from "./interfaces/IGenePool.sol";
 import {QRNG} from "./QRNG.sol";
 import "./interfaces/IToken.sol";
-import "./interfaces/IRaiGotchiItem.sol";
 import "./helper/RaiGotchiEnum.sol";
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
@@ -314,7 +313,7 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         emit Pass(from, to);
     }
 
-    function onComsumeImmidiateUseItem(
+    function onConsumeImmidiateUseItem(
         uint256 _nftId,
         uint256 _itemTimeExtension,
         uint256 _itemShield,

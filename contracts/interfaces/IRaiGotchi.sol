@@ -78,7 +78,7 @@ interface IRaiGotchi {
         uint256 _debt
     ) external;
 
-        function onComsumeImmidiateUseItem(
+    function onConsumeImmidiateUseItem(
         uint256 _nftId,
         uint256 _itemTimeExtension,
         uint256 _itemShield,

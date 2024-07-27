@@ -20,19 +20,13 @@ contract RaiGotchiBreed is Ownable, Pausable {
     address treasury;
 
     // Breed info
-    uint256 totalBreeds;
+    uint256 public totalBreeds;
     mapping(uint256 => uint256) public breedFinishTime;
     mapping(uint256 => uint256) public breedCount;
     mapping(uint256 => address) public breedOwner;
     mapping(uint256 => uint256[2]) public breedParentsId;
-    mapping(uint256 => uint256) public parent1PendingPoints;
-    mapping(uint256 => uint256) public parent2PendingPoints;
 
-    event StartBreed(
-        uint256 breedId,
-        uint256 nftId,
-        uint256 nftId2
-    );
+    event StartBreed(uint256 breedId, uint256 nftId, uint256 nftId2);
 
     constructor(address _raiGotchiNFT, address _token, address _treasury) {
         raiGotchiNFT = IRaiGotchi(_raiGotchiNFT);
@@ -188,8 +182,6 @@ contract RaiGotchiBreed is Ownable, Pausable {
         raiGotchiNFT.unlockPet(parent1);
         raiGotchiNFT.unlockPet(parent2);
 
-        parent1PendingPoints[_breedId] = 0;
-        parent2PendingPoints[_breedId] = 0;
         breedOwner[_breedId] = address(0);
     }
 

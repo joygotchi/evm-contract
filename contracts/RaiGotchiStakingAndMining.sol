@@ -34,6 +34,7 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
     mapping(uint256 => PoolInfo) public poolInfo;
     mapping(address => mapping(uint256 => uint256)) public userStakedPetCount;
     mapping(uint256 => address) public stakedPetOwner;
+    mapping(uint256 => mapping(uint256 => bool)) public isPetStakedInPool;
 
     // Mining pool
     string public miningPoolName;
@@ -75,7 +76,7 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
 
     event Mined(address owner, uint256 pointsEarned);
 
-    event PointsRedemed(address owner, uint256 prototypeTokenIds);
+    event PointsRedemed(address owner, uint256 prototypeTokenId);
 
     constructor(
         address _raiGotchiNFT,
@@ -196,7 +197,7 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
             "Your pet is locked, you cannot stake it"
         );
 
-        token.transferFrom(msg.sender, treasury, pool.tokenRewardPerSlot);
+        token.transferFrom(msg.sender, treasury, pricePerSlot);
 
         raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(_nftId);
 
@@ -207,6 +208,7 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
         poolInfo[_poolId].totalStakedSlot++;
 
         stakedPetOwner[_nftId] = msg.sender;
+        isPetStakedInPool[_nftId][_poolId] = true;
 
         emit PetStaked(_nftId, _poolId);
     }
@@ -221,6 +223,11 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
         require(_stakedPetOwner == msg.sender, "Not pet owner");
 
         require(
+            isPetStakedInPool[_nftId][_poolId] == true,
+            "Your pet is not staked in this pool"
+        );
+
+        require(
             raiGotchiNFT.isPetLocked(_nftId),
             "Your pet is not locked, you cannot unstake it"
         );
@@ -230,11 +237,12 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
             "Staking pool has not ended yet"
         );
 
+        stakedPetOwner[_nftId] = address(0);
+        isPetStakedInPool[_nftId][_poolId] = false;
+
         for (uint i = 0; i < pool.rewardNFTIds.length; i++) {
             raiGotchiNFTItem.mint(_stakedPetOwner, pool.rewardNFTIds[i]);
         }
-
-        stakedPetOwner[_nftId] = address(0);
 
         token.transfer(_stakedPetOwner, pool.tokenRewardPerSlot);
         raiGotchiNFT.unlockPet(_nftId);
@@ -322,7 +330,7 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
         );
 
         uint256 totalMiningChargeOfTime = (chargeOfTimeMultiplier *
-            totalMiningPower[msg.sender]) / BASE_DENOMINATOR;
+            totalMiningChargeTime[msg.sender]) / BASE_DENOMINATOR;
 
         require(
             lastMiningTime[msg.sender] + totalMiningChargeOfTime >
@@ -332,8 +340,8 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
 
         lastMiningTime[msg.sender] = block.timestamp;
 
-        uint256 totalPointsMined = miningPowerMultiplier *
-            totalMiningPower[msg.sender];
+        uint256 totalPointsMined = (miningPowerMultiplier *
+            totalMiningPower[msg.sender]) / BASE_DENOMINATOR;
 
         miningPoints[msg.sender] += totalPointsMined;
 

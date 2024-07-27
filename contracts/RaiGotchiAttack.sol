@@ -3,7 +3,6 @@
 pragma solidity ^0.8.17;
 
 import "./interfaces/IRaiGotchi.sol";
-import "./helper/RaiGotchiEnum.sol";
 import {FixedPointMathLib} from "solmate/src/utils/FixedPointMathLib.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
@@ -54,13 +53,14 @@ contract RaiGotchiAttack is Ownable, Pausable {
             "Your pet is locked"
         );
         require(raiGotchiNFT.isPetLocked(toId) == false, "Their pet is locked");
+        require(raiGotchiNFT.ownerOf(toId) != address(0), "Invalid pet id");
 
         if (raiGotchiNFT.petShield(toId) > 0) {
             raiGotchiNFT.reducePetShield(toId);
             emit AttackBlocked(fromId, toId);
             return;
         }
-        
+
         raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(fromId);
         raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(toId);
 

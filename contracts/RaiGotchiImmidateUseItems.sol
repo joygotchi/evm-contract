@@ -102,7 +102,7 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
 
         token.transferFrom(msg.sender, treasury, amount);
 
-        raiGotchiNFT.onComsumeImmidiateUseItem(
+        raiGotchiNFT.onConsumeImmidiateUseItem(
             nftId,
             itemTimeExtension[itemId],
             itemShield[itemId],

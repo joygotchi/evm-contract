@@ -79,7 +79,7 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
         uint256 petStar
     );
 
-    constructor(address _raiGotchiNFT) ERC721("Rai Gotchi Items", "JGCItems") {
+    constructor(address _raiGotchiNFT) ERC721("Rai Gotchi Items", "RGCItems") {
         raiGotchiNFT = IRaiGotchi(_raiGotchiNFT);
     }
 
@@ -167,7 +167,6 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
 
     // Pet card is an NFT that is transform from your NFT Pet
     function mintPetCard(
-        address _to,
         uint256 _petId
     ) public isApprovedRaiGotchiNFT(_petId) whenNotPaused {
         require(!isPetMintToCard[_petId], "Pet card already minted");
@@ -181,12 +180,12 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
         petAttack[currentTokenId] = speciesAttackPoints[speciesId];
         petDefense[currentTokenId] = speciesDefensePoints[speciesId];
         petStar[currentTokenId] = 1;
-        _mint(_to, totalItems);
+        _mint(msg.sender, totalItems);
         totalItems++;
 
         emit PetCardMinted(
             currentTokenId,
-            _to,
+            msg.sender,
             speciesId,
             speciesAttackPoints[speciesId],
             speciesDefensePoints[speciesId],
@@ -248,13 +247,11 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
     function editItems(
         uint256 _prototypeId,
         string memory _prototypeItemImage,
-        ItemRarity _prototypeItemRarity,
         uint256 _prototypeItemminingPower,
         uint256 _prototypeItemminingChargeTime
     ) public onlyOwner whenNotPaused {
         require(_prototypeId < totalPrototypeItems, "Invalid prototype id");
         prototypeItemImage[_prototypeId] = _prototypeItemImage;
-        prototypeItemRarity[_prototypeId] = _prototypeItemRarity;
         prototypeItemminingPower[_prototypeId] = _prototypeItemminingPower;
         prototypeItemminingChargeTime[
             _prototypeId
@@ -328,7 +325,7 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
         epicDropRate = _rate;
     }
 
-    function LegendaryItemDropRate(uint256 _rate) public onlyOwner {
+    function setLegendaryItemDropRate(uint256 _rate) public onlyOwner {
         require(_rate <= MAX_CHANCE && _rate > epicDropRate, "Invalid rate");
         legendaryDropRate = _rate;
     }
@@ -410,7 +407,7 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
             );
     }
 
-    // Use to set allow for contract mining, raigotchi
+    // Use to set allow for contract mining
     function setAllowAddress(address _address, bool _allow) public onlyOwner {
         _allowAddress[_address] = _allow;
     }
