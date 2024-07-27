@@ -83,7 +83,6 @@ async function main() {
   const RaiGotchiBreed = await hre.ethers.getContractFactory("RaiGotchiBreed");
   const raiGotchiBreed = await RaiGotchiBreed.deploy(
     raiGotchiV2.target,
-    raiGotchiItems.target,
     token.target,
     raiGotchiTreasury.target
   );
@@ -214,7 +213,6 @@ async function main() {
     address: raiGotchiBreed.target,
     constructorArguments: [
       raiGotchiV2.target,
-      raiGotchiItems.target,
       token.target,
       raiGotchiTreasury.target,
     ],

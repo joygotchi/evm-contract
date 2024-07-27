@@ -56,7 +56,7 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
     mapping(uint256 => bool) public isPetLocked;
     mapping(uint256 => uint256) private _petPendingStarvingTime;
     mapping(uint256 => PetStatus) private _lockedPetStatus;
-    mapping(uint256 => uint256[]) public petAccessories;
+    mapping(uint256 => uint256) public petAccessories;
 
     // vritual staking
     mapping(uint256 => uint256) public ethOwed;
@@ -93,10 +93,6 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         uint256 timeUntilStarving,
         uint256 timePetBorn
     );
-
-    event AccessoryAdded(uint256 nftId, uint256 itemId);
-
-    event AccessoryRemoved(uint256 nftId, uint256 itemId);
 
     constructor(
         address _token,
@@ -193,7 +189,7 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         ) {
             genePool.reducePopulationAndAddSpeciesToGenePool(speciesOfDead);
         }
-        
+
         _burn(_deadId);
         uint256 pending = pendingEth(_deadId);
         // redeem for dead pet
@@ -207,70 +203,6 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         emit PetKilled(_deadId, petName[_deadId], pending, msg.sender);
     }
 
-    function addAccessoryToPet(
-        uint256 _nftId,
-        uint256 _itemId
-    ) external isApproved(_nftId) whenNotPaused {
-        require(
-            raiGotchiNFTItem.ownerOf(_itemId) == msg.sender ||
-                raiGotchiNFTItem.getApproved(_itemId) == msg.sender,
-            "Not your item"
-        );
-
-        require(
-            raiGotchiNFTItem.itemType(_itemId) == ItemType.ACCESSORY,
-            "Not an accessory"
-        );
-
-        require(raiGotchiNFTItem.isItemLock(_itemId), "Item is locked");
-
-        raiGotchiNFTItem.lockItem(_itemId);
-
-        petRewardDebt[_nftId] = petScore[_nftId].mulDivDown(
-            ethAccPerShare,
-            PRECISION
-        );
-
-        petAccessories[_nftId].push(_itemId);
-
-        _evolvePetIfNeeded(_nftId);
-
-        emit AccessoryAdded(_nftId, _itemId);
-    }
-
-    function removeAccessoryFromPet(
-        uint256 _nftId,
-        uint256 _itemId
-    ) external isApproved(_nftId) whenNotPaused {
-        require(!raiGotchiNFTItem.isItemLock(_itemId), "Item is not locked");
-
-        raiGotchiNFTItem.unlockItem(_itemId);
-
-        uint256[] storage _accessories = petAccessories[_nftId];
-
-        bool isItemFound = false;
-
-        for (uint256 i = 0; i < _accessories.length; i++) {
-            if (_accessories[i] == _itemId) {
-                _accessories[i] = _accessories[_accessories.length - 1];
-                _accessories.pop();
-                isItemFound = true;
-                break;
-            }
-        }
-
-        require(isItemFound, "Item not added to pet");
-
-        petRewardDebt[_nftId] = petScore[_nftId].mulDivDown(
-            ethAccPerShare,
-            PRECISION
-        );
-
-        _evolvePetIfNeeded(_nftId);
-
-        emit AccessoryRemoved(_nftId, _itemId);
-    }
-
     function setPetName(
         uint256 _id,
         string memory _name
@@ -281,23 +213,6 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
     function checkPetEvoleAndUpdateIfNeeded(
         uint256 _nftId
     ) external isAuthorized whenNotPaused {
-        _evolvePetIfNeeded(_nftId);
-    }
-
-    function addPetScoreAfterUsedItem(
-        uint256 _nftId,
-        uint256 _score
-    ) external isAuthorized whenNotPaused {
-        if (petScore[_nftId] > 0) {
-            ethOwed[_nftId] = pendingEth(_nftId);
-        }
-
-        petScore[_nftId] += _score;
-        petRewardDebt[_nftId] = petScore[_nftId].mulDivDown(
-            ethAccPerShare,
-            PRECISION
-        );
-        totalScores += _score;
         _evolvePetIfNeeded(_nftId);
     }
 
@@ -403,7 +318,9 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
     function onComsumeImmidiateUseItem(
         uint256 _nftId,
         uint256 _itemTimeExtension,
-        uint256 _itemShield
+        uint256 _itemShield,
+        uint256 _itemPoints,
+        bool _itemIsAccessory
     ) external whenNotPaused {
         require(msg.sender == immidiateUseItemsContract, "Not authorized");
 
@@ -415,6 +332,23 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         }
 
         petShield[_nftId] += _itemShield;
+
+        if (_itemIsAccessory) {
+            petAccessories[_nftId]++;
+        }
+
+        if (petScore[_nftId] > 0) {
+            ethOwed[_nftId] = pendingEth(_nftId);
+        }
+
+        petScore[_nftId] += _itemPoints;
+        petRewardDebt[_nftId] = petScore[_nftId].mulDivDown(
+            ethAccPerShare,
+            PRECISION
+        );
+        totalScores += _itemPoints;
+
+        _evolvePetIfNeeded(_nftId);
     }
 
     /*//////////////////////////////////////////////////////////////

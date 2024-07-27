@@ -3,7 +3,6 @@
 pragma solidity ^0.8.17;
 
 import "./interfaces/IRaiGotchi.sol";
-import "./interfaces/IRaiGotchiItem.sol";
 import "./interfaces/IToken.sol";
 import "./helper/RaiGotchiEnum.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
@@ -11,7 +10,6 @@ import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 contract RaiGotchiBreed is Ownable, Pausable {
     IRaiGotchi public raiGotchiNFT;
-    IRaiGotchiItem public raiGotchiNFTItem;
     IToken public token;
 
     uint256 constant MAX_BREED_COUNT = 7;
@@ -33,18 +31,11 @@ contract RaiGotchiBreed is Ownable, Pausable {
     event StartBreed(
         uint256 breedId,
         uint256 nftId,
-        uint256 nftId2,
-        uint256 itemId
+        uint256 nftId2
     );
 
-    constructor(
-        address _raiGotchiNFT,
-        address _raiGotchiNFTItem,
-        address _token,
-        address _treasury
-    ) {
+    constructor(address _raiGotchiNFT, address _token, address _treasury) {
         raiGotchiNFT = IRaiGotchi(_raiGotchiNFT);
-        raiGotchiNFTItem = IRaiGotchiItem(_raiGotchiNFTItem);
         token = IToken(_token);
         treasury = _treasury;
         baseBreedTime = 1 days;
@@ -60,19 +51,9 @@ contract RaiGotchiBreed is Ownable, Pausable {
         _;
     }
 
-    modifier isApprovedRaiGotchiNFTItem(uint256 id) {
-        require(
-            raiGotchiNFTItem.ownerOf(id) == msg.sender ||
-                raiGotchiNFTItem.getApproved(id) == msg.sender,
-            "Item not approved"
-        );
-        _;
-    }
-
     function checkConditionBeforeBreed(
         uint256 _nftId,
         uint256 _nftId2,
-        uint256 _itemId,
         uint256 species1,
         uint256 species2
     ) private {
@@ -125,62 +106,37 @@ contract RaiGotchiBreed is Ownable, Pausable {
                 raiGotchiNFT.speciesMaxPopulation(species2),
             "Species at max population"
         );
-
-        require(
-            raiGotchiNFTItem.itemType(_itemId) == ItemType.BREED,
-            "Not a breed item"
-        );
     }
 
     function breed(
         uint256 _nftId,
-        uint256 _nftId2,
-        uint256 _itemId
+        uint256 _nftId2
     )
         external
         whenNotPaused
         isApprovedRaiGotchiNFT(_nftId)
         isApprovedRaiGotchiNFT(_nftId2)
-        isApprovedRaiGotchiNFTItem(_itemId)
     {
         uint256 species1 = raiGotchiNFT.petSpecies(_nftId);
         uint256 species2 = raiGotchiNFT.petSpecies(_nftId2);
 
-        checkConditionBeforeBreed(_nftId, _nftId2, _itemId, species1, species2);
-
-        uint256 points = raiGotchiNFTItem.itemPoints(_itemId);
-
-        raiGotchiNFTItem.burn(_itemId);
+        checkConditionBeforeBreed(_nftId, _nftId2, species1, species2);
 
         raiGotchiNFT.lockPet(_nftId);
         raiGotchiNFT.lockPet(_nftId2);
 
         uint256 _breedTime = baseBreedTime * breedCount[_nftId];
-        uint256 cooldownBreedTime = raiGotchiNFTItem.cooldownBreedTime(_itemId);
 
-        breedFinishTime[totalBreeds] = _breedTime > cooldownBreedTime
-            ? block.timestamp + _breedTime - cooldownBreedTime
-            : block.timestamp;
+        breedFinishTime[totalBreeds] = block.timestamp + _breedTime;
 
         uint256 _breedFee = baseBreedFee * breedCount[_nftId];
-        uint256 reduceBreedFee = raiGotchiNFTItem.reduceBreedFee(_itemId);
 
-        if (_breedFee > reduceBreedFee) {
-            token.transferFrom(
-                msg.sender,
-                treasury,
-                _breedFee - reduceBreedFee
-            );
-        }
+        token.transferFrom(msg.sender, treasury, _breedFee);
 
-        parent1PendingPoints[totalBreeds] = points / 2;
-        parent2PendingPoints[totalBreeds] =
-            points -
-            parent1PendingPoints[totalBreeds];
         breedParentsId[totalBreeds] = [_nftId, _nftId2];
         breedOwner[totalBreeds] = msg.sender;
 
-        emit StartBreed(totalBreeds, _nftId, _nftId2, _itemId);
+        emit StartBreed(totalBreeds, _nftId, _nftId2);
 
         totalBreeds++;
     }
@@ -221,16 +177,6 @@ contract RaiGotchiBreed is Ownable, Pausable {
         } else {
             _newPetSpecies = _random % 2 == 0 ? species1 : species2;
         }
-
-        raiGotchiNFT.addPetScoreAfterUsedItem(
-            parent1,
-            parent1PendingPoints[_breedId]
-        );
-
-        raiGotchiNFT.addPetScoreAfterUsedItem(
-            parent2,
-            parent2PendingPoints[_breedId]
-        );
 
         raiGotchiNFT.createNewPetAfterBreed(
             _random,

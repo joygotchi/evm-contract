@@ -21,27 +21,32 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
     IRaiGotchi public raiGotchiNFT;
 
     mapping(address => bool) _allowAddress;
+    mapping(uint256 => bool) public isPetMintToCard;
+
+    // Species attributes
+    uint256 speciesCount;
+    mapping(uint256 => uint256) public speciesAttackPoints;
+    mapping(uint256 => uint256) public speciesDefensePoints;
 
     // Item properties
     uint256 public totalItems;
     mapping(uint256 => string) itemImage;
     mapping(uint256 => ItemType) itemType;
-    mapping(uint256 => uint256) cooldownBreedTime;
-    mapping(uint256 => uint256) reduceBreedFee;
-    mapping(uint256 => uint256) itemPoints;
     mapping(uint256 => ItemRarity) itemRarity;
     mapping(uint256 => uint256) miningPower;
     mapping(uint256 => uint256) miningChargeTime;
+    mapping(uint256 => uint256) nftPetType;
+    mapping(uint256 => uint256) petAttack;
+    mapping(uint256 => uint256) petDefense;
+    mapping(uint256 => uint256) petStar;
 
-    // Prototype Item
+    // Prototype Item (this logic is for later add more item types)
+    // For current logic there is only 2 type item: mineTool and petCard and these 2 logic is seperate
     uint256 public totalPrototypeItems;
     mapping(uint256 => uint256) public itemRarityAmount;
     mapping(uint256 => uint256[]) listPrototypeItemsOfRarity;
     mapping(uint256 => string) prototypeItemImage;
     mapping(uint256 => ItemType) prototypeItemType;
-    mapping(uint256 => uint256) prototypeItemCooldownBreedTime;
-    mapping(uint256 => uint256) prototypeItemReduceBreedFee;
-    mapping(uint256 => uint256) prototypeItemPoints;
     mapping(uint256 => ItemRarity) prototypeItemRarity;
     mapping(uint256 => uint256) prototypeItemminingPower;
     mapping(uint256 => uint256) prototypeItemminingChargeTime;
@@ -65,6 +70,15 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
         uint256 indexed prototypeId
     );
 
+    event PetCardMinted(
+        uint256 indexed tokenId,
+        address indexed owner,
+        uint256 petType,
+        uint256 petAttack,
+        uint256 petDefense,
+        uint256 petStar
+    );
+
     constructor(address _raiGotchiNFT) ERC721("Rai Gotchi Items", "JGCItems") {
         raiGotchiNFT = IRaiGotchi(_raiGotchiNFT);
     }
@@ -74,6 +88,40 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
         _;
     }
 
+    modifier isApprovedraiGotchiNFT(uint256 id) {
+        require(
+            raiGotchiNFT.ownerOf(id) == msg.sender ||
+                raiGotchiNFT.getApproved(id) == msg.sender,
+            "Not approved"
+        );
+        _;
+    }
+
+    function getSpeciesAttribute(
+        uint256 _speciesId
+    ) public view returns (uint256 _attackPoints, uint256 _defensePoints) {
+        _attackPoints = speciesAttackPoints[_speciesId];
+        _defensePoints = speciesDefensePoints[_speciesId];
+    }
+
+    function getPetCardAttribute(
+        uint256 _id
+    )
+        public
+        view
+        returns (
+            uint256 _nftPetType,
+            uint256 _petAttack,
+            uint256 _petDefense,
+            uint256 _petStar
+        )
+    {
+        _nftPetType = nftPetType[_id];
+        _petAttack = petAttack[_id];
+        _petDefense = petDefense[_id];
+        _petStar = petStar[_id];
+    }
+
     function getItemAttribute(
         uint256 _id
     )
@@ -81,18 +129,12 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
         view
         returns (
             ItemType _itemType,
-            uint256 _cooldownBreedTime,
-            uint256 _reduceBreedFee,
-            uint256 _itemPoints,
             ItemRarity _itemRarity,
             uint256 _miningPower,
             uint256 _miningChargeTime
         )
     {
         _itemType = itemType[_id];
-        _reduceBreedFee = reduceBreedFee[_id];
-        _cooldownBreedTime = cooldownBreedTime[_id];
-        _itemPoints = itemPoints[_id];
         _itemRarity = itemRarity[_id];
         _miningPower = miningPower[_id];
         _miningChargeTime = miningChargeTime[_id];
@@ -110,13 +152,6 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
         uint256 currentTokenId = totalItems;
         itemImage[currentTokenId] = prototypeItemImage[_prototypeItemId];
         itemType[currentTokenId] = itemType[_prototypeItemId];
-        reduceBreedFee[currentTokenId] = prototypeItemReduceBreedFee[
-            _prototypeItemId
-        ];
-        cooldownBreedTime[currentTokenId] = prototypeItemCooldownBreedTime[
-            _prototypeItemId
-        ];
-        itemPoints[currentTokenId] = prototypeItemPoints[_prototypeItemId];
         itemRarity[currentTokenId] = prototypeItemRarity[_prototypeItemId];
         miningPower[currentTokenId] = prototypeItemminingPower[
             _prototypeItemId
@@ -130,16 +165,24 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
         emit ItemMinted(currentTokenId, _to, _prototypeItemId);
     }
 
-    function burn(uint256 _tokenId) public isValid whenNotPaused {
-        delete itemImage[_tokenId];
-        delete itemType[_tokenId];
-        delete cooldownBreedTime[_tokenId];
-        delete reduceBreedFee[_tokenId];
-        delete itemPoints[_tokenId];
-        delete itemRarity[_tokenId];
-        delete miningPower[_tokenId];
-        delete miningChargeTime[_tokenId];
-        _burn(_tokenId);
+    // Pet card is an NFT that is transform from your NFT Pet
+    function mintPetCard(
+        address _to,
+        uint256 _petId
+    ) public isApprovedraiGotchiNFT(_petId) whenNotPaused {
+        require(!isPetMintToCard[_petId], "Pet card already minted");
+        uint256 speciesId = raiGotchiNFT.petSpecies(_petId);
+        uint256 currentTokenId = totalItems;
+        isPetMintToCard[_petId] = true;
+        itemType[currentTokenId] = ItemType.PETCARD;
+        itemImage[currentTokenId] = "";
+        itemRarity[currentTokenId] = ItemRarity.Common;
+        nftPetType[currentTokenId] = speciesId;
+        petAttack[currentTokenId] = speciesAttackPoints[speciesId];
+        petDefense[currentTokenId] = speciesDefensePoints[speciesId];
+        petStar[currentTokenId] = 1;
+        _mint(_to, totalItems);
+        totalItems++;
     }
 
     function lockItem(uint256 _tokenId) public isValid whenNotPaused {
@@ -162,9 +205,6 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
     function createPrototypeItem(
         string memory _prototypeItemImage,
         ItemRarity _prototypeItemRarity,
-        uint256 _prototypeItemCooldownBreedTime,
-        uint256 _prototypeItemReduceBreedFee,
-        uint256 _prototypeItemPoints,
         ItemType _prototypeItemType,
         uint256 _prototypeItemminingPower,
         uint256 _prototypeItemminingChargeTime
@@ -173,16 +213,12 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
             revert("Invalid item type");
         }
 
+        // Pet card can't be created here
+        require(_prototypeItemType != ItemType.PETCARD, "Invalid item type");
+
         uint256 currentPrototypeId = totalPrototypeItems;
         prototypeItemImage[currentPrototypeId] = _prototypeItemImage;
         prototypeItemRarity[currentPrototypeId] = _prototypeItemRarity;
-        prototypeItemCooldownBreedTime[
-            currentPrototypeId
-        ] = _prototypeItemCooldownBreedTime;
-        prototypeItemReduceBreedFee[
-            currentPrototypeId
-        ] = _prototypeItemReduceBreedFee;
-        prototypeItemPoints[currentPrototypeId] = _prototypeItemPoints;
         prototypeItemType[currentPrototypeId] = _prototypeItemType;
         prototypeItemminingPower[
             currentPrototypeId
@@ -204,26 +240,36 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
         uint256 _prototypeId,
         string memory _prototypeItemImage,
         ItemRarity _prototypeItemRarity,
-        uint256 _prototypeItemCooldownBreedTime,
-        uint256 _prototypeItemReduceBreedFee,
-        uint256 _prototypeItemPoints,
         uint256 _prototypeItemminingPower,
         uint256 _prototypeItemminingChargeTime
     ) public onlyOwner whenNotPaused {
         require(_prototypeId < totalPrototypeItems, "Invalid prototype id");
         prototypeItemImage[_prototypeId] = _prototypeItemImage;
         prototypeItemRarity[_prototypeId] = _prototypeItemRarity;
-        prototypeItemCooldownBreedTime[
-            _prototypeId
-        ] = _prototypeItemCooldownBreedTime;
-        prototypeItemReduceBreedFee[
-            _prototypeId
-        ] = _prototypeItemReduceBreedFee;
-        prototypeItemPoints[_prototypeId] = _prototypeItemPoints;
         prototypeItemminingPower[_prototypeId] = _prototypeItemminingPower;
         prototypeItemminingChargeTime[
             _prototypeId
         ] = _prototypeItemminingChargeTime;
+    }
+
+    function addSpeciesAttackAndDefensePoints(
+        uint256 _attackPoints,
+        uint256 _defensePoints
+    ) public onlyOwner whenNotPaused {
+        uint256 currentSpeciesId = speciesCount;
+        speciesAttackPoints[currentSpeciesId] = _attackPoints;
+        speciesDefensePoints[currentSpeciesId] = _defensePoints;
+        speciesCount++;
+    }
+
+    function editSpeciesAttackAndDefensePoints(
+        uint256 _speciesId,
+        uint256 _attackPoints,
+        uint256 _defensePoints
+    ) public onlyOwner whenNotPaused {
+        require(_speciesId < speciesCount, "Invalid species id");
+        speciesAttackPoints[_speciesId] = _attackPoints;
+        speciesDefensePoints[_speciesId] = _defensePoints;
     }
 
     function getPrototypeForNewItem(
@@ -296,20 +342,22 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
             abi.encodePacked(
                 '{"trait_type": "itemType","value":"',
                 _uint2str(uint256(itemType[id])),
-                '"},{"trait_type": "cooldownBreedTime","value":"',
-                _uint2str(cooldownBreedTime[id]),
-                '"},{"trait_type": "reduceBreedFee","value":"',
-                _uint2str(reduceBreedFee[id])
-            ),
-            abi.encodePacked(
-                '"},{"trait_type": "itemPoints","value":"',
-                _uint2str(itemPoints[id]),
                 '"},{"trait_type": "itemRarity","value":"',
                 _uint2str(uint256(itemRarity[id])),
                 '"},{"trait_type": "miningPower","value":"',
                 _uint2str(miningPower[id]),
                 '"},{"trait_type": "miningChargeTime","value":"',
-                _uint2str(miningChargeTime[id]),
+                _uint2str(miningChargeTime[id])
+            ),
+            abi.encodePacked(
+                '"},{"trait_type": "nftPetType","value":"',
+                _uint2str(nftPetType[id]),
+                '"},{"trait_type": "petAttack","value":"',
+                _uint2str(petAttack[id]),
+                '"},{"trait_type": "petDefense","value":"',
+                _uint2str(petDefense[id]),
+                '"},{"trait_type": "petStar","value":"',
+                _uint2str(petStar[id]),
                 '"}'
             )
         );
@@ -348,7 +396,7 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
             );
     }
 
-    // Use to set allow for contract breed, stake, raigotchi
+    // Use to set allow for contract mining, raigotchi
     function setAllowAddress(address _address, bool _allow) public onlyOwner {
         _allowAddress[_address] = _allow;
     }

@@ -10,7 +10,6 @@ enum PetStatus {
 }
 
 enum ItemType {
-    ACCESSORY,
-    BREED,
-    MINETOOL
+    MINETOOL,
+    PETCARD
 }

@@ -11,6 +11,7 @@ const SHIELD = "1"; // 1 shield, Shield boost for the pet to avoid attacks
 const ATTACK_BOOST = "1"; // 1 attack boost, boost attack attribute for the pet
 const DEFENSE_BOOST = "1"; // 1 defense boost, boost defense attribute for the pet
 const IS_REVIVAL = false; // Define if item can revive a dead pet
+const IS_ACCESSORY = false; // Define if item is an accessory
 
 async function main() {
   const network = hre.network.name;
@@ -34,7 +35,8 @@ async function main() {
     SHIELD,
     ATTACK_BOOST,
     DEFENSE_BOOST,
-    IS_REVIVAL
+    IS_REVIVAL,
+    IS_ACCESSORY
   );
 
   console.log("Done");

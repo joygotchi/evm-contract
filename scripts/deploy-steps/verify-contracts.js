@@ -49,7 +49,6 @@ async function main() {
     address: contracts.raiGotchiBreed,
     constructorArguments: [
       contracts.raiGotchiV2,
-      contracts.raiGotchiItems,
       contracts.token,
       contracts.raiGotchiTreasury,
     ],

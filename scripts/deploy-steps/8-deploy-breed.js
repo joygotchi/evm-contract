@@ -11,7 +11,6 @@ async function main() {
   const RaiGotchiBreed = await hre.ethers.getContractFactory("RaiGotchiBreed");
   const raiGotchiBreed = await RaiGotchiBreed.deploy(
     contracts.raiGotchiV2,
-    contracts.raiGotchiItems,
     contracts.token,
     contracts.raiGotchiTreasury
   );

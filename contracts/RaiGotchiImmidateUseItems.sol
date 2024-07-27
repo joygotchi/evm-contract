@@ -22,9 +22,8 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
     mapping(uint256 => string) public itemName;
     mapping(uint256 => uint256) public itemTimeExtension;
     mapping(uint256 => uint256) public itemShield;
-    mapping(uint256 => uint256) public itemAttackBoost;
-    mapping(uint256 => uint256) public itemDefenseBoost;
     mapping(uint256 => bool) public itemIsRevival;
+    mapping(uint256 => bool) public itemIsAccessory;
 
     event ImidiateUseItemCreated(
         uint256 id,
@@ -33,9 +32,8 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         uint256 points,
         uint256 timeExtension,
         uint256 shield,
-        uint256 itemAttackBoost,
-        uint256 itemDefenseBoost,
-        bool isRevival
+        bool isRevival,
+        bool isAccessory
     );
 
     event ItemConsumed(uint256 nftId, address giver, uint256 itemId);
@@ -71,14 +69,18 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         returns (
             string memory _name,
             uint256 _price,
+            uint256 _stock,
             uint256 _points,
-            uint256 _timeExtension
+            uint256 _timeExtension,
+            uint256 _shield
         )
     {
         _name = itemName[_itemId];
         _price = itemPrice[_itemId];
+        _stock = itemStock[_itemId];
         _timeExtension = itemTimeExtension[_itemId];
         _points = itemPoints[_itemId];
+        _shield = itemShield[_itemId];
     }
 
     function buyImidiateUseItem(
@@ -93,8 +95,6 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         ); //no revives
         require(itemStock[itemId] > 0, "Out of stock");
 
-        // if (!shouldContinue) return;
-
         uint256 amount = itemPrice[itemId];
 
         itemPrice[itemId] += itemPriceDelta[itemId];
@@ -105,10 +105,10 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         raiGotchiNFT.onComsumeImmidiateUseItem(
             nftId,
             itemTimeExtension[itemId],
-            itemShield[itemId]
+            itemShield[itemId],
+            itemPoints[itemId],
+            itemIsAccessory[itemId]
         );
-
-        raiGotchiNFT.addPetScoreAfterUsedItem(nftId, itemPoints[itemId]);
 
         raiGotchiNFT.getWalletSeedAndUpdateIfNeeded();
         raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(nftId);
@@ -125,9 +125,8 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         uint256 points,
         uint256 timeExtension,
         uint256 shield,
-        uint256 attackBoost,
-        uint256 defenseBoost,
-        bool isRevival
+        bool isRevival,
+        bool isAccessory
     ) external onlyOwner whenNotPaused {
         uint256 newItemId = _itemIds;
         itemName[newItemId] = name;
@@ -137,9 +136,8 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         itemPoints[newItemId] = points;
         itemTimeExtension[newItemId] = timeExtension;
         itemShield[newItemId] = shield;
-        itemAttackBoost[newItemId] = attackBoost;
-        itemDefenseBoost[newItemId] = defenseBoost;
         itemIsRevival[newItemId] = isRevival;
+        itemIsAccessory[newItemId] = isAccessory;
 
         _itemIds++;
 
@@ -150,9 +148,8 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
             points,
             timeExtension,
             shield,
-            attackBoost,
-            defenseBoost,
-            isRevival
+            isRevival,
+            isAccessory
         );
     }
 
@@ -165,7 +162,8 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         uint256 _points,
         uint256 _timeExtension,
         uint256 _shield,
-        bool _isRevival
+        bool _isRevival,
+        bool _isAccessory
     ) external onlyOwner whenNotPaused {
         itemPrice[_id] = _price;
         itemPriceDelta[_id] = _priceDelta;
@@ -175,6 +173,7 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         itemTimeExtension[_id] = _timeExtension;
         itemShield[_id] = _shield;
         itemIsRevival[_id] = _isRevival;
+        itemIsAccessory[_id] = _isAccessory;
     }
 
     /**

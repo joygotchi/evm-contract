@@ -49,7 +49,7 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
     mapping(address => uint256[]) public miningToolUsed;
 
     uint256 public constant MAX_MINING_TOOL = 3;
-    uint256 public constant BASE_DENOMINAOR = 1000;
+    uint256 public constant BASE_DENOMINATOR = 1000;
 
     event StakingPoolCreated(
         uint256 poolId,
@@ -322,7 +322,7 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
         );
 
         uint256 totalMiningChargeOfTime = (chargeOfTimeMultiplier *
-            totalMiningPower[msg.sender]) / BASE_DENOMINAOR;
+            totalMiningPower[msg.sender]) / BASE_DENOMINATOR;
 
         require(
             lastMiningTime[msg.sender] + totalMiningChargeOfTime >
