@@ -153,8 +153,8 @@ async function main() {
   await raiGotchiItems.setAllowAddress(raiGotchiStakingAndMining.target, true);
   console.log("Allow RaiGotchiStakingAndMining for NFT items success");
 
-  await token.transfer(faucet.target, ethers.parseEther("1000000"));
-  console.log("Transfer token to faucet success");
+  // await token.transfer(faucet.target, ethers.parseEther("1000000"));
+  // console.log("Transfer token to faucet success");
   await token.enableTrading();
   console.log("Enable trading success");
 

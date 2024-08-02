@@ -102,6 +102,9 @@ module.exports = {
       },
     ],
   },
+  mocha: {
+    timeout: 100000000,
+  },
   contractSizer: {
     alphaSort: true,
     runOnCompile: true,

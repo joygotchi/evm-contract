@@ -18,8 +18,6 @@ async function main() {
   console.log("Token contract saved");
 
   // Settings
-  await token.transfer(contracts.raiGotchiFaucet, ethers.parseEther("1000000")); // For testnet, disable in mainnet
-  console.log("Transfer token to faucet success");
   await token.enableTrading();
   console.log("Enable trading success");
 
