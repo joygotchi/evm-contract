@@ -1,5 +1,6 @@
 const { parseUnits } = require("ethers");
 const hre = require("hardhat");
+const { getContracts } = require("../utils");
 
 // Example of creating an item prototype (keep in mind that the attributes for breed and mining only set if the item is for breed or mining)
 const IMAGE = "https://www.pinterest.com/pin/695735842470093598/"; // image url of the item

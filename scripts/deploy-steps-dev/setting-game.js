@@ -8,8 +8,6 @@ async function main() {
   const RaiGotchiV2 = await hre.ethers.getContractFactory("RaiGotchiV2");
   const raiGotchiV2 = RaiGotchiV2.attach(contracts.raiGotchiV2);
 
-
-
   // Settings for system RaiGotchiV2 contract
   await raiGotchiV2.setGenePool(contracts.genePool);
   console.log("Set GenePool success");
@@ -30,7 +28,7 @@ async function main() {
   const token = Token.attach(contracts.token);
 
   // Transfer and enable faucet (only for testnet)
-  await token.transfer(contracts.raiGotchiFaucet, ethers.parseEther("1000000")); 
+  await token.transfer(contracts.raiGotchiFaucet, ethers.parseEther("1000000"));
   console.log("Transfer token to faucet success");
 
   const Faucet = await hre.ethers.getContractFactory("RaiGotchiFaucet");

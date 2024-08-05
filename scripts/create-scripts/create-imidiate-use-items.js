@@ -1,5 +1,6 @@
 const { parseUnits } = require("ethers");
 const hre = require("hardhat");
+const { getContracts } = require("../utils");
 
 const NAME = "ITEM 1";
 const PRICE = parseUnits("1000", 18); // 1000 tokens with 18 decimals
