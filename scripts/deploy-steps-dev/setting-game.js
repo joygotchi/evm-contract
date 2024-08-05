@@ -31,12 +31,15 @@ async function main() {
   await token.transfer(contracts.raiGotchiFaucet, ethers.parseEther("1000000"));
   console.log("Transfer token to faucet success");
 
-  const Faucet = await hre.ethers.getContractFactory("RaiGotchiFaucet");
-  const faucet = Faucet.attach(contracts.raiGotchiFaucet);
+  await token.excludeFromFees(contracts.raiGotchiFaucet, true);
+  console.log("Exclude faucet from fees success");
 
-  // Enable faucet
-  await faucet.toggleActive();
-  console.log("Enable faucet success");
+  // const Faucet = await hre.ethers.getContractFactory("RaiGotchiFaucet");
+  // const faucet = Faucet.attach(contracts.raiGotchiFaucet);
+
+  // Toggle faucet on/off (default is on)
+  // await faucet.toggleActive();
+  // console.log("Enable faucet success");
 }
 
 main()
