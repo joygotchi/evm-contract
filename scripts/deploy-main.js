@@ -153,13 +153,33 @@ async function main() {
   await raiGotchiItems.setAllowAddress(raiGotchiStakingAndMining.target, true);
   console.log("Allow RaiGotchiStakingAndMining for NFT items success");
 
-  // await token.transfer(faucet.target, ethers.parseEther("1000000"));
-  // console.log("Transfer token to faucet success");
+  // enable trading for RaiGotchiToken
   await token.enableTrading();
   console.log("Enable trading success");
 
+  // Set mining pool settings
+  const MINING_POOL_NAME = "Mining Pool Test";
+  const MINING_POWER_MULTIPLIER = 1500; // 1.5X Mining power multiplier
+  const CHARGE_TIME_MULTIPLIER = 2000; // 2X Charge time multiplier
+
+  await raiGotchiStakingAndMining.configureMiningPool(
+    MINING_POOL_NAME,
+    MINING_POWER_MULTIPLIER,
+    CHARGE_TIME_MULTIPLIER
+  );
+
+  console.log("Set mining pool settings success");
+
+  // Set mining pool redeem settings
+  const POINTS_USED_PER_REDEEM = 10_000; // 10000 point used per redeem
+
+  await raiGotchiStakingAndMining.setMiningPointsUsedPerRedemn(
+    POINTS_USED_PER_REDEEM
+  );
+
+  console.log("Set mining pool redeem settings success");
+
   console.log("Done setting");
-  // enable trading
 
   console.log("Done deploy");
 

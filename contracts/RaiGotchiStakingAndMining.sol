@@ -89,6 +89,7 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
         token = IToken(_token);
         treasury = _treasury;
         pricePerSlot = 35 ether;
+        tokenEarnedPerRedemn = 1 ether;
     }
 
     modifier isApprovedRaiGotchiNFT(uint256 id) {

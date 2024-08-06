@@ -165,6 +165,7 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         bool _isRevival,
         bool _isAccessory
     ) external onlyOwner whenNotPaused {
+        require(_id < _itemIds, "Item doesn't exist");
         itemPrice[_id] = _price;
         itemPriceDelta[_id] = _priceDelta;
         itemStock[_id] = _stock;
