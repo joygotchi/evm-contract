@@ -6,8 +6,8 @@ const stakingPoolData = [
   {
     name: "Staking Pool 1", // Staking pool name
     rewardNFTIds: [0, 1, 2, 3], // List of reward NFT ids
-    stakingStartTime: "1723042800", // Staking start time
-    stakingEndTime: "1723044600", // Staking end time
+    stakingStartTime: "1723028400", // Staking start time
+    stakingEndTime: "1723029000", // Staking end time
     maxSlotsInPool: 20, // Maximum slots in this pool
     tokenRewardPerSlot: parseUnits("1", 18), // User receive back 1  raigotchi token after unstake from this pool
     maxSlotPerWallet: 3, // Maximum slots per wallet
@@ -54,25 +54,23 @@ async function main() {
 
   // Need to wait for approve transaction to be success first before creating staking pool
   // In case of approve transaction failed you can run this script again
-  if (tx.status === 1) {
-    console.log("Approve transaction hash: ", tx.hash);
+  console.log("Approve transaction hash: ", tx.hash);
 
-    // Create staking pool
-    for (let i = 0; i < stakingPoolData.length; i++) {
-      const stakingPool = stakingPoolData[i];
+  // Create staking pool
+  for (let i = 0; i < stakingPoolData.length; i++) {
+    const stakingPool = stakingPoolData[i];
 
-      await raiGotchiStakingAndMining.createNewStakingPool(
-        stakingPool.name,
-        stakingPool.rewardNFTIds,
-        stakingPool.stakingStartTime,
-        stakingPool.stakingEndTime,
-        stakingPool.maxSlotsInPool,
-        stakingPool.tokenRewardPerSlot,
-        stakingPool.maxSlotPerWallet
-      );
+    await raiGotchiStakingAndMining.createNewStakingPool(
+      stakingPool.name,
+      stakingPool.rewardNFTIds,
+      stakingPool.stakingStartTime,
+      stakingPool.stakingEndTime,
+      stakingPool.maxSlotsInPool,
+      stakingPool.tokenRewardPerSlot,
+      stakingPool.maxSlotPerWallet
+    );
 
-      console.log("Staking pool created: ", stakingPool.name);
-    }
+    console.log("Staking pool created: ", stakingPool.name);
   }
 
   /**

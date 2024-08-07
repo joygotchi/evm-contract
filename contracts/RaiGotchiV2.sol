@@ -275,9 +275,13 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
     function lockPet(uint256 _nftId) external isAuthorized whenNotPaused {
         require(isPetAlive(_nftId), "Can't lock dead pet");
         isPetLocked[_nftId] = true;
-        _petPendingStarvingTime[_nftId] =
-            block.timestamp -
-            timeUntilStarving[_nftId];
+        if (timeUntilStarving[_nftId] > block.timestamp) {
+            _petPendingStarvingTime[_nftId] =
+                timeUntilStarving[_nftId] -
+                block.timestamp;
+        } else {
+            _petPendingStarvingTime[_nftId] = 0;
+        }
         _lockedPetStatus[_nftId] = getStatus(_nftId);
     }
 

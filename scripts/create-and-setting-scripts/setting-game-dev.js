@@ -32,6 +32,23 @@ async function main() {
   );
   console.log("Set ImmidiateUseItemsContract success");
 
+  // Settings QRNG contract (need to change sponsor wallet in config file correspondingly to the raigotchiV2 contract)
+  await raiGotchiV2.setRequestParameters(
+    contracts.airnodeAddress,
+    contracts.endpointIdUint256,
+    contracts.sponsorWallet
+  );
+
+  const RaiGotchiItems = await hre.ethers.getContractFactory("RaiGotchiItems");
+  const raiGotchiItems = RaiGotchiItems.attach(contracts.raiGotchiItems);
+
+  // Settings allow contract to mint NFT for RaiGotchiItems contract
+  await raiGotchiItems.setAllowAddress(
+    contracts.raiGotchiStakingAndMining,
+    true
+  );
+  console.log("Allow RaiGotchiStakingAndMining for NFT items success");
+
   const Token = await hre.ethers.getContractFactory("RaiGotchiToken");
   const token = Token.attach(contracts.token);
 

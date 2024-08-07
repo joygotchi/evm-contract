@@ -19,6 +19,13 @@ const listNFTItems = [
   },
   {
     image: IMAGE,
+    rarity: 1,
+    type: TYPE,
+    miningPower: "500",
+    miningChargeTime: "1800", // 30 minutes
+  },
+  {
+    image: IMAGE,
     rarity: 2,
     type: TYPE,
     miningPower: "1000",
@@ -30,13 +37,6 @@ const listNFTItems = [
     type: TYPE,
     miningPower: "2000",
     miningChargeTime: "600", // 10 minutes
-  },
-  {
-    image: IMAGE,
-    rarity: 1,
-    type: TYPE,
-    miningPower: "500",
-    miningChargeTime: "1800", // 30 minutes
   },
 ];
 

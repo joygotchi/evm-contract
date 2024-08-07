@@ -15,13 +15,6 @@ async function main() {
 
   saveContract(network, "raiGotchiItems", raiGotchiItems.target);
   console.log("RaiGotchiItems contract saved");
-
-  // Settings allow contract to mint NFT for RaiGotchiItems contract
-  await raiGotchiItems.setAllowAddress(
-    contracts.raiGotchiStakingAndMining,
-    true
-  );
-  console.log("Allow RaiGotchiStakingAndMining for NFT items success");
 }
 
 main()
