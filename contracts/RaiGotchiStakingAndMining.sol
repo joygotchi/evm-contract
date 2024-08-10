@@ -10,7 +10,6 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 
 contract RaiGotchiStakingAndMining is Ownable, Pausable {
-    IRaiGotchi public raiGotchiNFT;
     IRaiGotchiItem public raiGotchiNFTItem;
     IToken public token;
     address public treasury;
@@ -70,13 +69,7 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
 
     event PointsRedemed(address owner, uint256 prototypeTokenId);
 
-    constructor(
-        address _raiGotchiNFT,
-        address _raiGotchiNFTItem,
-        address _token,
-        address _treasury
-    ) {
-        raiGotchiNFT = IRaiGotchi(_raiGotchiNFT);
+    constructor(address _raiGotchiNFTItem, address _token, address _treasury) {
         raiGotchiNFTItem = IRaiGotchiItem(_raiGotchiNFTItem);
         token = IToken(_token);
         treasury = _treasury;

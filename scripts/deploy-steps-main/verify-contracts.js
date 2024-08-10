@@ -66,7 +66,6 @@ async function main() {
   await hre.run("verify:verify", {
     address: contracts.raiGotchiStakingAndMining,
     constructorArguments: [
-      contracts.raiGotchiV2,
       contracts.raiGotchiItems,
       contracts.token,
       contracts.raiGotchiTreasury,

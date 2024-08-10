@@ -13,7 +13,6 @@ async function main() {
     "RaiGotchiStakingAndMining"
   );
   const raiGotchiStakingAndMining = await RaiGotchiStakingAndMining.deploy(
-    contracts.raiGotchiV2,
     contracts.raiGotchiItems,
     contracts.token,
     contracts.raiGotchiTreasury

@@ -116,7 +116,6 @@ async function main() {
     "RaiGotchiStakingAndMining"
   );
   const raiGotchiStakingAndMining = await RaiGotchiStakingAndMining.deploy(
-    raiGotchiV2.target,
     raiGotchiItems.target,
     token.target,
     raiGotchiTreasury.target
@@ -141,8 +140,6 @@ async function main() {
   await raiGotchiV2.setStakingAndMiningContract(
     raiGotchiStakingAndMining.target
   );
-  console.log("Set StakingAndMiningContract success");
-  await raiGotchiV2.setAttackContract(raiGotchiAttack.target);
   console.log("Set AttackContract success");
   await raiGotchiV2.setImmidiateUseItemsContract(
     raiGotchiImmidiateUseItems.target
@@ -251,7 +248,6 @@ async function main() {
   await hre.run("verify:verify", {
     address: raiGotchiStakingAndMining.target,
     constructorArguments: [
-      raiGotchiV2.target,
       raiGotchiItems.target,
       token.target,
       raiGotchiTreasury.target,

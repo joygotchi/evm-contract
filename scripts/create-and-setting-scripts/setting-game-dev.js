@@ -21,10 +21,6 @@ async function main() {
   console.log("Set GenePool success");
   await raiGotchiV2.setBreedContract(contracts.raiGotchiBreed);
   console.log("Set BreedContract success");
-  await raiGotchiV2.setStakingAndMiningContract(
-    contracts.raiGotchiStakingAndMining
-  );
-  console.log("Set StakingAndMiningContract success");
   await raiGotchiV2.setAttackContract(contracts.raiGotchiAttack);
   console.log("Set AttackContract success");
   await raiGotchiV2.setImmidiateUseItemsContract(

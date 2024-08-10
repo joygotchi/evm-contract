@@ -26,7 +26,6 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
     IGenePool public genePool;
 
     address public breedContract;
-    address public stakingAndMiningContract;
     address public attackContract;
     address public immidiateUseItemsContract;
     address public treasury;
@@ -113,7 +112,6 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
     modifier isAuthorized() {
         require(
             msg.sender == breedContract ||
-                msg.sender == stakingAndMiningContract ||
                 msg.sender == attackContract ||
                 msg.sender == immidiateUseItemsContract,
             "Not authorized"
@@ -636,12 +634,6 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
     //////////////////////////////////////////////////////////////*/
     function setBreedContract(address _breedContract) external onlyOwner {
         breedContract = _breedContract;
-    }
-
-    function setStakingAndMiningContract(
-        address _stakingAndMiningContract
-    ) external onlyOwner {
-        stakingAndMiningContract = _stakingAndMiningContract;
     }
 
     function setAttackContract(address _attackContract) external onlyOwner {
