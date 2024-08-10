@@ -3,7 +3,6 @@ const { getContracts } = require("../utils");
 const { parseEther } = require("ethers");
 
 const MINING_POOL_NAME = "Mining Pool Test";
-const PRICE_PER_SLOT = parseEther("35"); // 35 tokens Raigotchi per staking slot
 const TOKEN_EARNED_PER_REDEEM = parseEther("1"); // 1 token Raigotchi earned per redeem
 const POINTS_USED_PER_REDEEM = 10_000; // 10000 point used per redeem
 const MINING_POWER_MULTIPLIER = 1500; // 1.5X Mining power multiplier
@@ -65,10 +64,6 @@ async function main() {
   const raiGotchiStakingAndMining = RaiGotchiStakingAndMining.attach(
     contracts.raiGotchiStakingAndMining
   );
-
-  // Set staking pool join price
-  await raiGotchiStakingAndMining.setPricePerSlot(PRICE_PER_SLOT);
-  console.log("Set price per slot success");
 
   // Set mining pool settings
   await raiGotchiStakingAndMining.configureMiningPool(
