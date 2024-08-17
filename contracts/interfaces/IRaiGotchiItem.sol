@@ -6,14 +6,6 @@ import "../helper/RaiGotchiEnum.sol";
 interface IRaiGotchiItem {
     function itemType(uint256 id) external view returns (ItemType);
 
-    function cooldownBreedTime(uint256 id) external view returns (uint256);
-
-    function reduceBreedFee(uint256 id) external view returns (uint256);
-
-    function itemPoints(uint256 id) external view returns (uint256);
-
-    function itemRarity(uint256 id) external view returns (uint256);
-
     function miningPower(uint256 id) external view returns (uint256);
 
     function miningChargeTime(uint256 id) external view returns (uint256);

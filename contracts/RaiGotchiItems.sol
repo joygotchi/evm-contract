@@ -30,15 +30,15 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
 
     // Item properties
     uint256 public totalItems;
-    mapping(uint256 => string) itemImage;
-    mapping(uint256 => ItemType) itemType;
-    mapping(uint256 => ItemRarity) itemRarity;
-    mapping(uint256 => uint256) miningPower;
-    mapping(uint256 => uint256) miningChargeTime;
-    mapping(uint256 => uint256) nftPetType;
-    mapping(uint256 => uint256) petAttack;
-    mapping(uint256 => uint256) petDefense;
-    mapping(uint256 => uint256) petStar;
+    mapping(uint256 => string) public itemImage;
+    mapping(uint256 => ItemType) public itemType;
+    mapping(uint256 => ItemRarity) public itemRarity;
+    mapping(uint256 => uint256) public miningPower;
+    mapping(uint256 => uint256) public miningChargeTime;
+    mapping(uint256 => uint256) public nftPetType;
+    mapping(uint256 => uint256) public petAttack;
+    mapping(uint256 => uint256) public petDefense;
+    mapping(uint256 => uint256) public petStar;
 
     // Prototype Item (this logic is for later add more item types)
     // For current logic there is only 2 type item: mineTool and petCard and these 2 logic is seperate
@@ -58,7 +58,7 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
     uint256 public rareDropRate = 20;
     uint256 public commonDropRate = 100;
 
-    mapping(uint256 => bool) isItemLock;
+    mapping(uint256 => bool) public isItemLock;
 
     event PrototypeItemCreated(
         uint256 indexed prototypeId,
@@ -122,7 +122,7 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
         _petStar = petStar[_id];
     }
 
-    function getItemAttribute(
+    function getMiningItemAttribute(
         uint256 _id
     )
         public

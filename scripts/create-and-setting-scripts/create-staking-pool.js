@@ -7,8 +7,8 @@ const stakingPoolData = [
     name: "Staking Pool 1", // Staking pool name
     rewardNFTId: 1, // Reward NFT id
     pricePerSlot: parseUnits("1", 18), // User need to pay 1 raigotchi token to stake in this pool
-    stakingStartTime: "1723028400", // Staking start time
-    stakingEndTime: "1723029000", // Staking end time
+    stakingStartTime: "1723885200", // Staking start time
+    stakingEndTime: "1723888800", // Staking end time
     maxSlotsInPool: 20, // Maximum slots in this pool
     maxSlotPerWallet: 3, // Maximum slots per wallet
   },
