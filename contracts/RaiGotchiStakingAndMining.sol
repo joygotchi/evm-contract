@@ -266,8 +266,7 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
             totalMiningChargeTime[msg.sender]) / BASE_DENOMINATOR;
 
         require(
-            lastMiningTime[msg.sender] + totalMiningChargeOfTime >
-                block.timestamp,
+            block.timestamp > totalMiningChargeOfTime + lastMiningTime[msg.sender],
             "You need to wait for the mining tool to be charged"
         );
 
