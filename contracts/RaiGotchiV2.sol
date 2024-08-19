@@ -53,7 +53,6 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
     mapping(uint256 => bool) public isPetLocked;
     mapping(uint256 => uint256) private _petPendingStarvingTime;
     mapping(uint256 => PetStatus) private _lockedPetStatus;
-    mapping(uint256 => uint256) public petAccessories;
 
     // vritual staking
     mapping(uint256 => uint256) public ethOwed;
@@ -319,8 +318,7 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         uint256 _nftId,
         uint256 _itemTimeExtension,
         uint256 _itemShield,
-        uint256 _itemPoints,
-        bool _itemIsAccessory
+        uint256 _itemPoints
     ) external whenNotPaused {
         require(msg.sender == immidiateUseItemsContract, "Not authorized");
 
@@ -332,10 +330,6 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         }
 
         petShield[_nftId] += _itemShield;
-
-        if (_itemIsAccessory) {
-            petAccessories[_nftId]++;
-        }
 
         if (petScore[_nftId] > 0) {
             ethOwed[_nftId] = pendingEth(_nftId);

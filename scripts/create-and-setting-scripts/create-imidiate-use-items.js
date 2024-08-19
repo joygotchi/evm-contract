@@ -10,7 +10,6 @@ const { getContracts } = require("../utils");
 // const TIME = "86400"; // 1 day, time extension for the pet starving time
 // const SHIELD = "1"; // 1 shield, Shield boost for the pet to avoid attacks
 // const IS_REVIVAL = false; // Define if item can revive a dead pet
-// const IS_ACCESSORY = false; // Define if item is an accessory
 
 const listItems = [
   {
@@ -22,7 +21,6 @@ const listItems = [
     time_extension: "10800000",
     shield: 0,
     is_revival: false,
-    is_accessory: false,
   },
   {
     name: "Water",
@@ -33,7 +31,6 @@ const listItems = [
     time_extension: "10800000",
     shield: 0,
     is_revival: false,
-    is_accessory: false,
   },
   {
     name: "Shield",
@@ -44,29 +41,16 @@ const listItems = [
     time_extension: 0,
     shield: 1,
     is_revival: false,
-    is_accessory: false,
   },
   {
     name: "Revive water",
-    price: parseUnits("10", 18), // 1 token with 18 decimals
+    price: parseUnits("10", 18), // 10 token with 18 decimals
     price_delta: parseUnits("10", 18), // Each time an item is sold, the price increases by 1 token
     stock: 9998,
     points: parseUnits("10000", 12), // 10000 point (Pet's XP) (Unit is multiplied by 10^12)
     time_extension: "10800000",
     shield: 0,
     is_revival: true,
-    is_accessory: false,
-  },
-  {
-    name: "Bracelet",
-    price: parseUnits("5", 18), // 5 token with 18 decimals
-    price_delta: parseUnits("5", 18), // Each time an item is sold, the price increases by 5 token
-    stock: 90,
-    points: parseUnits("1000", 12), // 1000 point (Pet's XP) (Unit is multiplied by 10^12)
-    time_extension: 0,
-    shield: 0,
-    is_revival: false,
-    is_accessory: true,
   },
 ];
 
@@ -93,8 +77,7 @@ async function main() {
       item.points,
       item.time_extension,
       item.shield,
-      item.is_revival,
-      item.is_accessory
+      item.is_revival
     );
 
     console.log("Item created: ", item.name);

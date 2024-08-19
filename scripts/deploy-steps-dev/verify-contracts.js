@@ -64,6 +64,15 @@ async function main() {
   });
 
   await hre.run("verify:verify", {
+    address: contracts.raiGotchiAccessory,
+    constructorArguments: [
+      contracts.raiGotchiV2,
+      contracts.raiGotchiTreasury,
+      contracts.token,
+    ],
+  });
+
+  await hre.run("verify:verify", {
     address: contracts.raiGotchiStakingAndMining,
     constructorArguments: [
       contracts.raiGotchiItems,

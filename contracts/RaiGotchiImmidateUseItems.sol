@@ -23,7 +23,6 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
     mapping(uint256 => uint256) public itemTimeExtension;
     mapping(uint256 => uint256) public itemShield;
     mapping(uint256 => bool) public itemIsRevival;
-    mapping(uint256 => bool) public itemIsAccessory;
 
     event ImidiateUseItemCreated(
         uint256 id,
@@ -32,8 +31,7 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         uint256 points,
         uint256 timeExtension,
         uint256 shield,
-        bool isRevival,
-        bool isAccessory
+        bool isRevival
     );
 
     event ItemConsumed(uint256 nftId, address giver, uint256 itemId);
@@ -106,8 +104,7 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
             nftId,
             itemTimeExtension[itemId],
             itemShield[itemId],
-            itemPoints[itemId],
-            itemIsAccessory[itemId]
+            itemPoints[itemId]
         );
 
         raiGotchiNFT.getWalletSeedAndUpdateIfNeeded();
@@ -125,8 +122,7 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         uint256 points,
         uint256 timeExtension,
         uint256 shield,
-        bool isRevival,
-        bool isAccessory
+        bool isRevival
     ) external onlyOwner whenNotPaused {
         uint256 newItemId = _itemIds;
         itemName[newItemId] = name;
@@ -137,7 +133,6 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         itemTimeExtension[newItemId] = timeExtension;
         itemShield[newItemId] = shield;
         itemIsRevival[newItemId] = isRevival;
-        itemIsAccessory[newItemId] = isAccessory;
 
         _itemIds++;
 
@@ -148,8 +143,7 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
             points,
             timeExtension,
             shield,
-            isRevival,
-            isAccessory
+            isRevival
         );
     }
 
@@ -162,8 +156,7 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         uint256 _points,
         uint256 _timeExtension,
         uint256 _shield,
-        bool _isRevival,
-        bool _isAccessory
+        bool _isRevival
     ) external onlyOwner whenNotPaused {
         require(_id < _itemIds, "Item doesn't exist");
         itemPrice[_id] = _price;
@@ -174,7 +167,6 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         itemTimeExtension[_id] = _timeExtension;
         itemShield[_id] = _shield;
         itemIsRevival[_id] = _isRevival;
-        itemIsAccessory[_id] = _isAccessory;
     }
 
     /**

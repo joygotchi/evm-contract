@@ -50,15 +50,6 @@ async function main() {
   saveContract(network, "genePool", genePool.target);
   console.log("GenePool contract saved");
 
-  // Deploy RaiGotchi Faucet contract
-  const Faucet = await hre.ethers.getContractFactory("RaiGotchiFaucet");
-  const faucet = await Faucet.deploy(token.target);
-  await faucet.waitForDeployment();
-  console.log("Faucet:", faucet.target);
-
-  saveContract(network, "raiGotchiFaucet", faucet.target);
-  console.log("Faucet contract saved");
-
   // Deploy RaiGotchi NFT Items contract
   const RaiGotchiItems = await hre.ethers.getContractFactory("RaiGotchiItems");
   const raiGotchiItems = await RaiGotchiItems.deploy(raiGotchiV2.target);
@@ -111,6 +102,21 @@ async function main() {
   );
   console.log("RaiGotchiImmidiateUseItems contract saved");
 
+  // Deploy RaiGotchi Accessory contract
+  const RaiGotchiAccessory = await hre.ethers.getContractFactory(
+    "RaiGotchiAccessory"
+  );
+  const raiGotchiAccessory = await RaiGotchiAccessory.deploy(
+    raiGotchiV2.target,
+    raiGotchiTreasury.target,
+    token.target
+  );
+  await raiGotchiAccessory.waitForDeployment();
+  console.log("RaiGotchiAccessory:", raiGotchiAccessory.target);
+
+  saveContract(network, "raiGotchiAccessory", raiGotchiAccessory.target);
+  console.log("RaiGotchiAccessory contract saved");
+
   // Deploy RaiGotchi Staking And Mining contract
   const RaiGotchiStakingAndMining = await hre.ethers.getContractFactory(
     "RaiGotchiStakingAndMining"
@@ -137,21 +143,12 @@ async function main() {
   console.log("Set GenePool success");
   await raiGotchiV2.setBreedContract(raiGotchiBreed.target);
   console.log("Set BreedContract success");
-  await raiGotchiV2.setStakingAndMiningContract(
-    raiGotchiStakingAndMining.target
-  );
+  await raiGotchiV2.setAttackContract(raiGotchiStakingAndMining.target);
   console.log("Set AttackContract success");
   await raiGotchiV2.setImmidiateUseItemsContract(
     raiGotchiImmidiateUseItems.target
   );
   console.log("Set ImmidiateUseItemsContract success");
-
-  // Settings QRNG contract (need to change sponsor wallet in config file correspondingly to the raigotchiV2 contract)
-  await raiGotchiV2.setRequestParameters(
-    contracts.airnodeAddress,
-    contracts.endpointIdUint256,
-    contracts.sponsorWallet
-  );
 
   // Settings allow contract to mint NFT for RaiGotchiItems contract
   await raiGotchiItems.setAllowAddress(raiGotchiStakingAndMining.target, true);

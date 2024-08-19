@@ -16,10 +16,10 @@ async function main() {
   const raiGotchiV2 = RaiGotchiV2.attach(contracts.raiGotchiV2);
 
   // Settings for system RaiGotchiV2 contract
-  await raiGotchiV2.setGenePool(contracts.genePool);
-  console.log("Set GenePool success");
-  await raiGotchiV2.setBreedContract(contracts.raiGotchiBreed);
-  console.log("Set BreedContract success");
+  // await raiGotchiV2.setGenePool(contracts.genePool);
+  // console.log("Set GenePool success");
+  // await raiGotchiV2.setBreedContract(contracts.raiGotchiBreed);
+  // console.log("Set BreedContract success");
   await raiGotchiV2.setAttackContract(contracts.raiGotchiAttack);
   console.log("Set AttackContract success");
   await raiGotchiV2.setImmidiateUseItemsContract(

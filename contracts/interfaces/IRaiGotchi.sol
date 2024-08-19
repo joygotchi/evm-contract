@@ -82,7 +82,6 @@ interface IRaiGotchi {
         uint256 _nftId,
         uint256 _itemTimeExtension,
         uint256 _itemShield,
-        uint256 _itemPoints,
-        bool _isAccessory
+        uint256 _itemPoints
     ) external;
 }
