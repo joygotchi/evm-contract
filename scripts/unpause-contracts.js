@@ -33,6 +33,13 @@ async function main() {
   const RaiGotchiItems = await hre.ethers.getContractFactory("RaiGotchiItems");
   const raiGotchiItems = RaiGotchiItems.attach(contracts.raiGotchiItems);
 
+  const RaiGotchiAccessory = await hre.ethers.getContractFactory(
+    "RaiGotchiAccessory"
+  );
+  const raiGotchiAccessory = RaiGotchiAccessory.attach(
+    contracts.raiGotchiAccessory
+  );
+
   // Pause all the contract in case emergency
   await raiGotchiAttack.unpause();
   console.log("RaiGotchiAttack unpaused");
@@ -51,6 +58,9 @@ async function main() {
 
   await raiGotchiV2.unpause();
   console.log("RaiGotchiV2 unpaused");
+
+  await raiGotchiAccessory.unpause();
+  console.log("RaiGotchiAccessory unpaused");
 }
 
 main()
