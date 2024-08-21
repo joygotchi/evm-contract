@@ -4,14 +4,24 @@ const { getContracts } = require("../utils");
 
 const listItems = [
   {
-    typeBackground: 0,
+    typeBackground: 1,
     furniture: 0,
     price: parseUnits("1", 18), // 1 token with 18 decimals
   },
   {
-    typeBackground: 1,
+    typeBackground: 2,
+    furniture: 0,
+    price: parseUnits("1", 18),
+  },
+  {
+    typeBackground: 0,
     furniture: 1,
     price: parseUnits("2", 18), // 2 token with 18 decimals
+  },
+  {
+    typeBackground: 0,
+    furniture: 2,
+    price: parseUnits("2", 18),
   },
 ];
 

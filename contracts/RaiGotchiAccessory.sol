@@ -69,6 +69,12 @@ contract RaiGotchiAccessory is Ownable, Pausable {
         _price = itemPrice[_itemId];
     }
 
+    function getPetAccessories(
+        uint256 nftId
+    ) public view returns (uint256[] memory) {
+        return petAccessories[nftId];
+    }
+
     function buyAccessoryItem(
         uint256 nftId,
         uint256 itemId
@@ -100,6 +106,13 @@ contract RaiGotchiAccessory is Ownable, Pausable {
         uint256 _price
     ) external onlyOwner whenNotPaused {
         uint256 newItemId = _itemIds;
+
+        require(
+            (_typeBackground > 0 && _furniture == 0) ||
+                (_typeBackground == 0 && _furniture > 0),
+            "Item must be either a background or furniture"
+        );
+
         typeBackground[newItemId] = _typeBackground;
         furniture[newItemId] = _furniture;
         itemPrice[newItemId] = _price;
