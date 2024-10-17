@@ -14,14 +14,20 @@ contract RaiGotchiAccessory is Ownable, Pausable {
     address public treasury;
 
     uint256 public _itemIds;
+
     // Accessory items for the pet
     mapping(uint256 => uint256) public typeBackground;
     mapping(uint256 => uint256) public furniture;
     mapping(uint256 => uint256) public itemPrice;
 
-    // Pet accessories
-    mapping(uint256 => uint256[]) public petAccessories;
-    mapping(uint256 => mapping(uint256 => bool)) public isItemPurchased;
+    // Pet accessories struct
+    struct PetAccessoryBag {
+        uint256 accessoryId;
+        bool isUsed;
+    }
+
+    // Mapping from pet ID to its accessories bag
+    mapping(uint256 => PetAccessoryBag[]) public petAccessories;
 
     event AccessoryCreated(
         uint256 id,
@@ -48,11 +54,7 @@ contract RaiGotchiAccessory is Ownable, Pausable {
     }
 
     function itemExists(uint256 itemId) public view returns (bool) {
-        if (itemId < _itemIds) {
-            return true;
-        } else {
-            return false;
-        }
+        return itemId < _itemIds;
     }
 
     function getItemInfo(
@@ -71,7 +73,7 @@ contract RaiGotchiAccessory is Ownable, Pausable {
 
     function getPetAccessories(
         uint256 nftId
-    ) public view returns (uint256[] memory) {
+    ) public view returns (PetAccessoryBag[] memory) {
         return petAccessories[nftId];
     }
 
@@ -80,26 +82,26 @@ contract RaiGotchiAccessory is Ownable, Pausable {
         uint256 itemId
     ) external payable isApproved(nftId) whenNotPaused {
         require(itemExists(itemId), "This item doesn't exist");
-
         require(raiGotchiNFT.isPetAlive(nftId), "Pet dead");
 
-        require(
-            petAccessories[nftId].length == 0 ||
-                !isItemPurchased[nftId][itemId],
-            "Pet already has this accessory"
-        );
+        // Check if the pet already owns the accessory
+        for (uint256 i = 0; i < petAccessories[nftId].length; i++) {
+            require(
+                petAccessories[nftId][i].accessoryId != itemId,
+                "Pet already has this accessory"
+            );
+        }
 
         uint256 amount = itemPrice[itemId];
-
         token.transferFrom(msg.sender, treasury, amount);
 
-        isItemPurchased[nftId][itemId] = true;
-        petAccessories[nftId].push(itemId);
+        // Add the accessory to the pet's accessories bag
+        petAccessories[nftId].push(PetAccessoryBag(itemId, false));
 
         emit AccessoryPurchased(nftId, msg.sender, itemId);
     }
 
-    // add items
+    // Add items
     function createAccessory(
         uint256 _typeBackground,
         uint256 _furniture,

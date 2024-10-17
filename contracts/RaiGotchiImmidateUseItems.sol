@@ -14,6 +14,7 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
     address public treasury;
 
     uint256 public _itemIds;
+
     // items/benefits for the pet, general so can be food or anything in the future.
     mapping(uint256 => uint256) public itemPrice;
     mapping(uint256 => uint256) public itemPriceDelta;
@@ -23,6 +24,15 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
     mapping(uint256 => uint256) public itemTimeExtension;
     mapping(uint256 => uint256) public itemShield;
     mapping(uint256 => bool) public itemIsRevival;
+
+    // Struct to track purchased items that have not been used yet
+    struct BagItemUsed {
+        uint256 itemId;
+        bool isUsed;
+    }
+
+    // Mapping from pet ID to its purchased items (bag)
+    mapping(uint256 => BagItemUsed[]) public petBag;
 
     event ImidiateUseItemCreated(
         uint256 id,
@@ -34,7 +44,8 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         bool isRevival
     );
 
-    event ItemConsumed(uint256 nftId, address giver, uint256 itemId);
+    event ItemPurchased(uint256 nftId, address buyer, uint256 itemId);
+    event ItemConsumed(uint256 nftId, address user, uint256 itemId);
 
     constructor(address _raiGotchiNFT, address _treasury, address _token) {
         raiGotchiNFT = IRaiGotchi(_raiGotchiNFT);
@@ -52,11 +63,7 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
     }
 
     function itemExists(uint256 itemId) public view returns (bool) {
-        if (bytes(itemName[itemId]).length > 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return bytes(itemName[itemId]).length > 0;
     }
 
     function getImidiateUseItemInfo(
@@ -81,6 +88,11 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         _shield = itemShield[_itemId];
     }
 
+    function getPetBag(uint256 nftId) public view returns (BagItemUsed[] memory) {
+        return petBag[nftId];
+    }
+
+    // Function to buy an item and add it to the pet's bag
     function buyImidiateUseItem(
         uint256 nftId,
         uint256 itemId
@@ -89,8 +101,8 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         require(
             raiGotchiNFT.isPetAlive(nftId) ||
                 (!raiGotchiNFT.isPetAlive(nftId) && itemIsRevival[itemId]),
-            "pet dead or not revival item"
-        ); //no revives
+            "Pet is dead or not a revival item"
+        );
         require(itemStock[itemId] > 0, "Out of stock");
 
         uint256 amount = itemPrice[itemId];
@@ -100,6 +112,29 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
 
         token.transferFrom(msg.sender, treasury, amount);
 
+        // Add the purchased item to the pet's bag
+        petBag[nftId].push(BagItemUsed(itemId, false));
+
+        emit ItemPurchased(nftId, msg.sender, itemId);
+    }
+
+    // Function to consume an item from the pet's bag
+    function consumeItem(uint256 nftId, uint256 itemId) external isApproved(nftId) whenNotPaused {
+        require(raiGotchiNFT.isPetAlive(nftId), "Pet is dead");
+        
+        bool itemFound = false;
+
+        for (uint256 i = 0; i < petBag[nftId].length; i++) {
+            if (petBag[nftId][i].itemId == itemId && !petBag[nftId][i].isUsed) {
+                petBag[nftId][i].isUsed = true;
+                itemFound = true;
+                break;
+            }
+        }
+
+        require(itemFound, "Item not found or already used");
+
+        // Apply item effects to the pet
         raiGotchiNFT.onConsumeImmidiateUseItem(
             nftId,
             itemTimeExtension[itemId],
@@ -113,7 +148,7 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
         emit ItemConsumed(nftId, msg.sender, itemId);
     }
 
-    // add items
+    // Add items
     function createImidiateUseItem(
         string calldata name,
         uint256 price,

@@ -122,41 +122,52 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
                         Game Actions
     //////////////////////////////////////////////////////////////*/
 
-    function mint() public whenNotPaused {
-        // require(_tokenIds < 20_000, "Over the limit");
+   function mint(uint256 desiredSpecies) public whenNotPaused {
+    // Check if the token ID is within the allowed limit
+    require(_tokenIds < 20_000, "Over the limit");
 
-        token.transferFrom(msg.sender, treasury, mintPrice);
+    // Check if the specified species has been initialized
+    require(genePool.isSpeciesGeneInitialized(desiredSpecies), "Species not initialized");
 
-        timeUntilStarving[_tokenIds] = block.timestamp + 1 days;
-        timePetBorn[_tokenIds] = block.timestamp;
+    // Check if the specified species is available in the Gene Pool
+    // require(genePool.isSpeciesGeneAvailableInGenePool(desiredSpecies), "Species not available in gene pool");
 
-        (uint256 newPetSpecies, uint256 newPetSex) = genePool.generateGene(
-            msg.sender,
-            _tokenIds,
-            _getWalletSeedAndUpdateIfNeeded()
-        );
+    // Transfer the mint price from the caller to the treasury
+    token.transferFrom(msg.sender, treasury, mintPrice);
 
-        IGenePool.SpeciesDefaultAttrs memory speciesDefaultAttrs = genePool
-            .speciesDefaultAttrs(newPetSpecies);
+    // Set the time until the pet becomes starving and the time of birth
+    timeUntilStarving[_tokenIds] = block.timestamp + 1 days;
+    timePetBorn[_tokenIds] = block.timestamp;
 
-        genePool.newMemberJoinSpecies(newPetSpecies);
-        petSpecies[_tokenIds] = newPetSpecies;
-        petSkinColor[_tokenIds] = speciesDefaultAttrs.skinColor;
-        petHornStyle[_tokenIds] = speciesDefaultAttrs.hornStyle;
-        petWingStyle[_tokenIds] = speciesDefaultAttrs.wingStyle;
-        petSex[_tokenIds] = newPetSex;
+    // Determine the sex of the new pet (this logic can be modified as needed)
+    uint256 newPetSex = (desiredSpecies % 2); // Assuming sex is based on the index
 
-        if (
-            genePool.currentSpeciesPopulation(newPetSpecies) ==
-            genePool.speciesMaxPopulation(newPetSpecies)
-        ) {
-            genePool.removeSpeciesFromGenePool(newPetSpecies);
-        }
+    // Retrieve the default attributes for the specified species
+    IGenePool.SpeciesDefaultAttrs memory speciesDefaultAttrs = genePool.speciesDefaultAttrs(desiredSpecies);
 
-        // mint NFT
-        _mint(msg.sender, _tokenIds);
-        _tokenIds++;
+    // Join the population count for the species
+    genePool.newMemberJoinSpecies(desiredSpecies);
+
+    // Assign the attributes to the new pet
+    petSpecies[_tokenIds] = desiredSpecies;
+    petSkinColor[_tokenIds] = speciesDefaultAttrs.skinColor;
+    petHornStyle[_tokenIds] = speciesDefaultAttrs.hornStyle;
+    petWingStyle[_tokenIds] = speciesDefaultAttrs.wingStyle;
+    petSex[_tokenIds] = newPetSex;
+
+    // Check and remove the species if the population has reached its maximum
+    if (
+        genePool.currentSpeciesPopulation(desiredSpecies) ==
+        genePool.speciesMaxPopulation(desiredSpecies)
+    ) {
+        genePool.removeSpeciesFromGenePool(desiredSpecies);
     }
+
+    // Mint the NFT for the new pet
+    _mint(msg.sender, _tokenIds);
+    _tokenIds++;
+}
+
 
     // kill and burn pets.
     function kill(uint256 _deadId) external whenNotPaused {
