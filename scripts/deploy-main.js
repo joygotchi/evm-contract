@@ -17,6 +17,15 @@ async function main() {
   saveContract(network, "token", token.target);
   console.log("Token contract saved");
 
+  // Deploy faucet testing token contract 
+  const Faucet = await hre.ethers.getContractFactory("RaiGotchiFaucet");
+  const faucet = await Faucet.deploy(token.target);
+  await faucet.waitForDeployment();
+  console.log("RaiGotchiFaucet:", faucet.target);
+
+  saveContract(network, "faucet", faucet.target);
+  console.log("Faucet Testing Token contract saved");
+
   // Deploy RaiGotchi Treasury contract
   const RaiGotchiTreasury = await hre.ethers.getContractFactory(
     "RaiGotchiTreasury"

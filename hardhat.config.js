@@ -80,9 +80,15 @@ module.exports = {
       accounts: [process.env.PRIVATE_KEY],
       gasPrice: 1000000000,
     },
+    moonbase: {
+      url: "https://rpc.api.moonbase.moonbeam.network",
+      accounts: [process.env.PRIVATE_KEY],
+      gasPrice: 1000000000,
+    },
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: { moonbaseAlpha: "VI9UK5ZWEM3TPTV4N49TEMP79WCT83W2QK" }
+    ,
     customChains: [
       {
         network: "lightlinkMain",
