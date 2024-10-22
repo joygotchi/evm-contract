@@ -33,20 +33,28 @@ async function main() {
     );
 
 
-    // Approve minPrice token to treasury 
+    // Approve minPrice token to raiGotchiV2 contract address 
     // we set minPrice = 1 Token 
-    const tx = await raiGotchiToken.approve(contracts.raiGotchiTreasury, parseUnits("10", 18))
+    const tx = await raiGotchiToken.approve(contracts.raiGotchiV2, parseUnits("1", 18))
     
     await tx.wait();
-
-    const allowanceAfter = await raiGotchiToken.allowance(user.address, contracts.raiGotchiTreasury);
-    console.log("Allowance after approval:", allowanceAfter.toString());
-
+    console.log("Approve token successfully for pet 1");
     // desiredSpecies 
 
-    const txMint = await raiGotchiV2.mint(0);
-    await txMint.wait();
-    console.log("Done");
+    const txMintPet1 = await raiGotchiV2.mint(0);
+    await txMintPet1.wait();
+    console.log("Done Pet 1");
+
+    const tx2 = await raiGotchiToken.approve(contracts.raiGotchiV2, parseUnits("1", 18))
+    
+    await tx2.wait();
+    console.log("Approve token successfully for pet 2");
+
+    const txMintPet2 = await raiGotchiV2.mint(1);
+    await txMintPet2.wait();
+
+    console.log("Done Pet 2");
+
   }
   
   main()

@@ -280,6 +280,21 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         petRewardDebt[winnerId] += _debt;
     }
 
+    function currentSpeciesPopulation(
+        uint256 _species
+    ) external view returns (uint256) {
+        uint256 current = genePool.currentSpeciesPopulation(_species);
+        return current;
+    }
+
+    function speciesMaxPopulation(
+        uint256 _species
+    ) external view returns (uint256) {
+        uint256 max = genePool.speciesMaxPopulation(_species);
+        return max;
+
+    }
+
     function lockPet(uint256 _nftId) external isAuthorized whenNotPaused {
         require(isPetAlive(_nftId), "Can't lock dead pet");
         isPetLocked[_nftId] = true;
@@ -372,6 +387,34 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         } else {
             return speciesMaxEvolutionPhase;
         }
+    }
+
+
+    function petEvolutionPhaseExternal(
+        uint256 _nftId
+    ) external view returns (uint256) {
+        uint256 _species = petSpecies[_nftId];
+        uint256 _evolutionPhase = petEvolutionPhase[_nftId];
+        uint256 speciesMaxEvolutionPhase = genePool.speciesMaxEvolutionPhase(
+            _species
+        );
+        if (_evolutionPhase < speciesMaxEvolutionPhase) {
+            return _getPetEvolutionPhase(_nftId, _evolutionPhase);
+        } else {
+            return speciesMaxEvolutionPhase;
+        }
+    }
+
+
+    function speciesMaxEvolutionPhase(
+        uint256 _species
+    ) external view returns (uint256) {
+
+        uint256 speciesMaxEvolutionPhase = genePool.speciesMaxEvolutionPhase(
+            _species
+        );
+        return speciesMaxEvolutionPhase;
+
     }
 
     function getStatus(uint256 pet) public view returns (PetStatus _health) {

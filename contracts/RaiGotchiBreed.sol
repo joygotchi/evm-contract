@@ -83,12 +83,12 @@ contract RaiGotchiBreed is Ownable, Pausable {
         raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(_nftId2);
 
         require(
-            raiGotchiNFT.petEvolutionPhase(_nftId) ==
+            raiGotchiNFT.petEvolutionPhaseExternal(_nftId) ==
                 raiGotchiNFT.speciesMaxEvolutionPhase(species1),
             "Pet1 not max evolution phase"
         );
         require(
-            raiGotchiNFT.petEvolutionPhase(_nftId2) ==
+            raiGotchiNFT.petEvolutionPhaseExternal(_nftId2) ==
                 raiGotchiNFT.speciesMaxEvolutionPhase(species2),
             "Pet2 not max evolution phase"
         );
@@ -113,6 +113,7 @@ contract RaiGotchiBreed is Ownable, Pausable {
     {
         uint256 species1 = raiGotchiNFT.petSpecies(_nftId);
         uint256 species2 = raiGotchiNFT.petSpecies(_nftId2);
+
 
         checkConditionBeforeBreed(_nftId, _nftId2, species1, species2);
 
