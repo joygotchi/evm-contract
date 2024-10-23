@@ -320,6 +320,11 @@ contract RaiGotchiStakingAndMining is Ownable, Pausable {
         tokenEarnedPerRedemn = _token;
     }
 
+    function getPoolInfo(uint256 _poolId) public view returns (PoolInfo memory) {
+        require(_poolId < poolIds, "Pool ID does not exist");
+        return poolInfo[_poolId];
+    }
+    
     /** 
         @dev Calculate the charge of time for mining
         If user has 1 tool, the charge of time is the charge of time of the tool

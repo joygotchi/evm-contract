@@ -44,15 +44,15 @@ async function main() {
   );
   console.log("Allow RaiGotchiStakingAndMining for NFT items success");
 
-  const Token = await hre.ethers.getContractFactory("RaiGotchiToken");
-  const token = Token.attach(contracts.token);
+  // const Token = await hre.ethers.getContractFactory("RaiGotchiToken");
+  // const token = Token.attach(contracts.token);
 
   // Transfer and enable faucet (only for testnet)
-  await token.transfer(contracts.raiGotchiFaucet, ethers.parseEther("1000000"));
-  console.log("Transfer token to faucet success");
+  // await token.transfer(contracts.raiGotchiFaucet, ethers.parseEther("1000000"));
+  // console.log("Transfer token to faucet success");
 
-  const Faucet = await hre.ethers.getContractFactory("RaiGotchiFaucet");
-  const faucet = Faucet.attach(contracts.raiGotchiFaucet);
+  // const Faucet = await hre.ethers.getContractFactory("RaiGotchiFaucet");
+  // const faucet = Faucet.attach(contracts.raiGotchiFaucet);
 
   // Toggle faucet on/off (default is on)
   // await faucet.toggleActive();

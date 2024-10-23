@@ -7,8 +7,8 @@ const stakingPoolData = [
     name: "Staking Pool 1", // Staking pool name
     rewardNFTId: 1, // Reward NFT id
     pricePerSlot: parseUnits("1", 18), // User need to pay 1 raigotchi token to stake in this pool
-    stakingStartTime: "1723885200", // Staking start time
-    stakingEndTime: "1723888800", // Staking end time
+    stakingStartTime: 300, // Staking start time
+    stakingEndTime: 300, // Staking end time
     maxSlotsInPool: 20, // Maximum slots in this pool
     maxSlotPerWallet: 3, // Maximum slots per wallet
   },
@@ -34,8 +34,8 @@ async function main() {
       stakingPool.name,
       stakingPool.rewardNFTId,
       stakingPool.pricePerSlot,
-      stakingPool.stakingStartTime,
-      stakingPool.stakingEndTime,
+      await getBlockTime() + BigInt(stakingPool.stakingStartTime),
+      await getBlockTime() + BigInt(stakingPool.stakingEndTime),
       stakingPool.maxSlotsInPool,
       stakingPool.maxSlotPerWallet
     );
@@ -45,6 +45,20 @@ async function main() {
 
   console.log("Done");
 }
+
+async function getBlockTime() {
+
+  const blockNumber = await hre.ethers.provider.getBlockNumber();
+
+  const block = await hre.ethers.provider.getBlock(blockNumber);
+
+  const blockTime = block.timestamp;
+
+  console.log("Current block time (timestamp):", blockTime);
+  return BigInt(blockTime);
+}
+
+
 
 main()
   .then(() => process.exit(0))
