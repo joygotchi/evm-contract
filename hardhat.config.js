@@ -87,7 +87,7 @@ module.exports = {
     },
   },
   etherscan: {
-    apiKey: { moonbaseAlpha: "VI9UK5ZWEM3TPTV4N49TEMP79WCT83W2QK" }
+    apiKey: { moonbaseAlpha: "VI9UK5ZWEM3TPTV4N49TEMP79WCT83W2QK", auroraTest: "UH96CTNSM4GUIEDDHRE7Y17SVV7ND6W3XV"}
     ,
     customChains: [
       {
@@ -104,6 +104,14 @@ module.exports = {
         urls: {
           apiURL: "https://devnet.lightlink.io/api",
           browserURL: "https://devnet.lightlink.io",
+        },
+      },
+      {
+        network: "auroraTest",
+        chainId: 1313161555,
+        urls: {
+          apiURL: "https://explorer.testnet.aurora.dev/api",
+          browserURL: "https://explorer.testnet.aurora.dev",
         },
       },
     ],
