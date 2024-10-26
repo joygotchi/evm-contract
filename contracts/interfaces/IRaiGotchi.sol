@@ -44,7 +44,7 @@ interface IRaiGotchi {
 
     function petSpecies(uint256 _nftId) external view returns (uint256);
 
-    function petEvolutionPhase(uint256 _nftId) external view returns (uint256);
+    function petEvolutionPhaseExternal(uint256 _nftId) external view returns (uint256);
 
     function speciesMaxEvolutionPhase(
         uint256 _species

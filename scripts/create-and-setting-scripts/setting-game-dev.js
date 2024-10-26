@@ -4,9 +4,9 @@ const { parseEther } = require("ethers");
 
 const MINING_POOL_NAME = "Mining Pool Test";
 const TOKEN_EARNED_PER_REDEEM = parseEther("1"); // 1 token Raigotchi earned per redeem
-const POINTS_USED_PER_REDEEM = 10_000; // 10000 point used per redeem
+const POINTS_USED_PER_REDEEM = 10; //  point used per redeem
 const MINING_POWER_MULTIPLIER = 1500; // 1.5X Mining power multiplier
-const CHARGE_TIME_MULTIPLIER = 2000; // 2X Charge time multiplier
+const CHARGE_TIME_MULTIPLIER = 2; // 2X Charge time multiplier
 
 async function main() {
   const network = hre.network.name;
@@ -44,15 +44,15 @@ async function main() {
   );
   console.log("Allow RaiGotchiStakingAndMining for NFT items success");
 
-  const Token = await hre.ethers.getContractFactory("RaiGotchiToken");
-  const token = Token.attach(contracts.token);
+  // const Token = await hre.ethers.getContractFactory("RaiGotchiToken");
+  // const token = Token.attach(contracts.token);
 
   // Transfer and enable faucet (only for testnet)
-  await token.transfer(contracts.raiGotchiFaucet, ethers.parseEther("1000000"));
-  console.log("Transfer token to faucet success");
+  // await token.transfer(contracts.raiGotchiFaucet, ethers.parseEther("1000000"));
+  // console.log("Transfer token to faucet success");
 
-  const Faucet = await hre.ethers.getContractFactory("RaiGotchiFaucet");
-  const faucet = Faucet.attach(contracts.raiGotchiFaucet);
+  // const Faucet = await hre.ethers.getContractFactory("RaiGotchiFaucet");
+  // const faucet = Faucet.attach(contracts.raiGotchiFaucet);
 
   // Toggle faucet on/off (default is on)
   // await faucet.toggleActive();
