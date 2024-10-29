@@ -85,9 +85,15 @@ module.exports = {
       accounts: [process.env.PRIVATE_KEY],
       gasPrice: 1000000000,
     },
+    sei_atlantic_2: {
+      url: "https://evm-rpc-testnet.sei-apis.com/",
+      accounts: [process.env.PRIVATE_KEY],
+      gas: "auto",
+    },
+
   },
   etherscan: {
-    apiKey: { moonbaseAlpha: "VI9UK5ZWEM3TPTV4N49TEMP79WCT83W2QK", auroraTest: "UH96CTNSM4GUIEDDHRE7Y17SVV7ND6W3XV"}
+    apiKey: { moonbaseAlpha: "VI9UK5ZWEM3TPTV4N49TEMP79WCT83W2QK", auroraTest: "UH96CTNSM4GUIEDDHRE7Y17SVV7ND6W3XV", sei_atlantic_2: process.env.SEI_TESTNET_ETHERSCAN_API_KEY}
     ,
     customChains: [
       {
@@ -114,6 +120,15 @@ module.exports = {
           browserURL: "https://explorer.testnet.aurora.dev",
         },
       },
+      {
+        network: "sei_atlantic_2",
+        chainId: 1328,
+        urls: {
+          apiURL: "https://seitrace.com/atlantic-2/api",
+          browserURL: "https://seitrace.com"
+        }
+      },
+
     ],
   },
   mocha: {

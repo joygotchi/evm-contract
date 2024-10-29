@@ -11,9 +11,10 @@ import {QRNG} from "./QRNG.sol";
 import "./interfaces/IToken.sol";
 import "./helper/RaiGotchiEnum.sol";
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 // ERC721,
-contract RaiGotchiV2 is QRNG, ERC721, Pausable {
+contract RaiGotchiV2 is ERC721, Pausable, Ownable {
     using SafeTransferLib for address payable;
     using FixedPointMathLib for uint256;
     using SafeMath for uint256;
@@ -92,9 +93,8 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
 
     constructor(
         address _token,
-        address _qrngAirnode,
         address _treasury
-    ) QRNG(_qrngAirnode) ERC721("Rai Gotchi Pet", "Rai Gotchi") {
+    ) ERC721("Rai Gotchi Pet", "Rai Gotchi") {
         token = IToken(_token);
         treasury = _treasury;
     }
@@ -806,6 +806,15 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         return _getWalletSeedAndUpdateIfNeeded();
     }
 
+    function _getWalletSeedAndUpdateIfNeeded() private returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(
+            block.timestamp,
+            block.prevrandao,
+            msg.sender,
+            address(this)
+        )));
+    }
+    
     function random(uint256 seed) private returns (uint) {
         return
             uint(
