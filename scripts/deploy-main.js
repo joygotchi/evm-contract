@@ -152,7 +152,7 @@ async function main() {
   console.log("Set GenePool success");
   await raiGotchiV2.setBreedContract(raiGotchiBreed.target);
   console.log("Set BreedContract success");
-  await raiGotchiV2.setAttackContract(raiGotchiStakingAndMining.target);
+  await raiGotchiV2.setAttackContract(raiGotchiAttack.target);
   console.log("Set AttackContract success");
   await raiGotchiV2.setImmidiateUseItemsContract(
     raiGotchiImmidiateUseItems.target
