@@ -405,6 +405,29 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         }
     }
 
+   function getPetsByOwner(address owner) public view returns (uint256[] memory) {
+        // Get total number of pets owned
+        uint256 balance = balanceOf(owner);
+        
+        // Create array to store pet IDs
+        uint256[] memory pets = new uint256[](balance);
+        
+        // Track current index in pets array
+        uint256 currentIndex = 0;
+        
+        // Iterate through all possible tokens
+        for (uint256 id = 0; id < _tokenIds; id++) {
+            // Check if the token exists and belongs to the owner
+            if (currentIndex < balance && ownerOf(id) == owner) {
+                pets[currentIndex] = id;
+                currentIndex++;
+            }
+        }
+
+        return pets;
+    }
+
+    
 
     function speciesMaxEvolutionPhase(
         uint256 _species
