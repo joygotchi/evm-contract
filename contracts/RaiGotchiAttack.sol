@@ -45,7 +45,7 @@ contract RaiGotchiAttack is Ownable, Pausable {
     function attack(
         uint256 fromId,
         uint256 toId
-    ) external whenNotPaused isApprovedRaiGotchiNFT(fromId) {
+    ) external payable whenNotPaused isApprovedRaiGotchiNFT(fromId) {
         require(fromId != toId, "Can't hurt yourself");
         require(raiGotchiNFT.isPetAlive(fromId), "Your pet is dead");
         require(
@@ -134,17 +134,6 @@ contract RaiGotchiAttack is Ownable, Pausable {
             uint256 prizeDebt
         )
     {
-        // Random a number from 0 to 100 to determine the winner
-        uint256 _random = random(fromId + toId) % 101;
-        // If the random number is greater than the odds of winning, the attacker loses
-        if (_random > odds) {
-            winner = toId;
-            loser = fromId;
-        } else {
-            winner = fromId;
-            loser = toId;
-        }
-
         uint256 targetMaxLoss = raiGotchiNFT.petScore(toId).mulDivDown(
             feePercentage,
             PRECISION
@@ -154,6 +143,30 @@ contract RaiGotchiAttack is Ownable, Pausable {
             feePercentage,
             PRECISION
         );
+        uint256 fee = raiGotchiNFT.getRandomFee();
+        // Random a number from 0 to 100 to determine the winner
+        uint256 walletSeed = raiGotchiNFT.getWalletSeedAndUpdateIfNeeded{value:fee}();
+        uint256 seed = fromId + toId;
+        uint256 _random = uint(
+            keccak256(
+                abi.encodePacked(
+                    seed,
+                    block.prevrandao,
+                    block.timestamp,
+                    msg.sender,
+                    walletSeed
+                )
+            )
+        ) % 101;
+
+        // If the random number is greater than the odds of winning, the attacker loses
+        if (_random > odds) {
+            winner = toId;
+            loser = fromId;
+        } else {
+            winner = fromId;
+            loser = toId;
+        }
 
         // if I attack with odds of winning greater or equal to 50%
         // if I lose, I can lose 0.5% of target points + odds * target loss (capped to my 0.5%)
@@ -206,22 +219,6 @@ contract RaiGotchiAttack is Ownable, Pausable {
             feePercentage,
             PRECISION
         );
-    }
-
-    function random(uint256 seed) private returns (uint) {
-        uint256 walletSeed = raiGotchiNFT.getWalletSeedAndUpdateIfNeeded();
-        return
-            uint(
-                keccak256(
-                    abi.encodePacked(
-                        seed,
-                        block.prevrandao,
-                        block.timestamp,
-                        msg.sender,
-                        walletSeed
-                    )
-                )
-            );
     }
 
     /**

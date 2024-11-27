@@ -25,6 +25,7 @@
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
     "@nomicfoundation/hardhat-verify": "^2.0.2",
     "@openzeppelin/contracts": "^4.9.3",
+    "@pythnetwork/entropy-sdk-solidity": "^1.5.0",
     "@uniswap/v2-core": "^1.0.1",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "dotenv": "^16.3.1",

@@ -1,0 +1,16 @@
+{
+    "uniswapV2Router02": "0x925648eFf5A52B6A0Cd9187C1b4A461a2E258aF0",
+    "entropyContract": "0x36825bf3Fbdf5a29E2d5148bfe7Dcf7B5639e320",
+    "token": "0x8DA591BC987eCf7e392b1De56BB1622a452599D5",
+    "raiGotchiTreasury": "0x055DEeBCBB64787cFa7558208178af208De98A46",
+    "raiGotchiV2": "0x18210c8827f9d613Cc2825Ac0E97dC9957E03911",
+    "genePool": "0x75F2B4e79c981f7f21B9ff65c24F0346ebE98eD2",
+    "raiGotchiFaucet": "0x937529264EBF13a0203cfAf7bBf09a3822f6636a",
+    "raiGotchiItems": "0x3Cd47Bb94dfd80A0C01EA693629941524E63C042",
+    "raiGotchiAttack": "0xF01B70A60C5bbd2f8600a86a614505ee1E1a7522",
+    "raiGotchiBreed": "0x4b164DFEBeDd25cB4225E2FC6AAd4Bd750840D70",
+    "raiGotchiImmidiateUseItems": "0x441c968bb39700f59D3d3D28Cd9364B040164abe",
+    "raiGotchiStakingAndMining": "0x960aBf4040986407002d0aFCa113413aD1C6C968",
+    "raiGotchiAccessory": "0x45f14C7eaBFc186AFe593Ec000b6CfEe35eC71b9",
+    "faucet": "0x9C601Ec3543212d185cb3B9cd62814CFfdEdE285"
+}

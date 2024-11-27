@@ -65,7 +65,7 @@ interface IRaiGotchi {
 
     function addPetScoreAfterUsedItem(uint256 _nftId, uint256 _score) external;
 
-    function getWalletSeedAndUpdateIfNeeded() external returns (uint256);
+    function getWalletSeedAndUpdateIfNeeded() external payable returns (uint256);
 
     function petShield(uint256 _nftId) external view returns (uint256);
 
@@ -84,4 +84,7 @@ interface IRaiGotchi {
         uint256 _itemShield,
         uint256 _itemPoints
     ) external;
+
+    function getRandomFee() external view returns (uint256);
+
 }

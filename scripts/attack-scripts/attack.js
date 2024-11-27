@@ -28,15 +28,12 @@ async function main() {
       );
 
 
-
-    // Approve minPrice token to raiGotchiV2 contract address 
-    // we set minPrice = 1 Token 
-    // const tx = await raiGotchiToken.approve(contracts.raiGotchiV2, parseUnits("1", 18))
-    
-    // await tx.wait();
-    // console.log("Approve token successfully for pet 1");
-
-    const txAttack = await raiGotchiAttack.attack(1,2);
+    const txAttack = await raiGotchiAttack.attack(0, 1, {
+        value: "100000000000000001",
+        gasLimit: 1000000,  // Add reasonable gas limit
+        maxFeePerGas: parseUnits("50", "gwei"),  // Adjust this value based on network conditions
+        maxPriorityFeePerGas: parseUnits("2", "gwei")  // Tip for miners/validators
+    });
     await txAttack.wait();
     console.log("Done Attack");
 

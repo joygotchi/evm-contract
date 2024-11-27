@@ -7,13 +7,16 @@ import {ERC721} from "solmate/src/tokens/ERC721.sol";
 import {FixedPointMathLib} from "solmate/src/utils/FixedPointMathLib.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {IGenePool} from "./interfaces/IGenePool.sol";
-import {QRNG} from "./QRNG.sol";
+
 import "./interfaces/IToken.sol";
 import "./helper/RaiGotchiEnum.sol";
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
+import {Entropy} from "./Entropy.sol";
 
 // ERC721,
-contract RaiGotchiV2 is QRNG, ERC721, Pausable {
+contract RaiGotchiV2 is Entropy, ERC721, Pausable {
     using SafeTransferLib for address payable;
     using FixedPointMathLib for uint256;
     using SafeMath for uint256;
@@ -29,6 +32,7 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
     address public attackContract;
     address public immidiateUseItemsContract;
     address public treasury;
+    address public entropyAddress;
 
     uint256 public la = 2;
     uint256 public lb = 2;
@@ -64,6 +68,7 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
 
     uint256 public hasTheDiamond;
 
+
     /*//////////////////////////////////////////////////////////////
                              Events
     //////////////////////////////////////////////////////////////*/
@@ -92,11 +97,12 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
 
     constructor(
         address _token,
-        address _qrngAirnode,
+        address _entropyAddress,
         address _treasury
-    ) QRNG(_qrngAirnode) ERC721("Rai Gotchi Pet", "Rai Gotchi") {
+    ) ERC721("Rai Gotchi Pet", "Rai Gotchi") Entropy(_entropyAddress) {
         token = IToken(_token);
         treasury = _treasury;
+        entropyAddress = _entropyAddress;
     }
 
     modifier isApproved(uint256 id) {
@@ -170,7 +176,7 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
 
 
     // kill and burn pets.
-    function kill(uint256 _deadId) external whenNotPaused {
+    function kill(uint256 _deadId) external payable whenNotPaused {
         require(
             !isPetAlive(_deadId),
             "The pet has to be starved to claim his points"
@@ -204,7 +210,9 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         totalScores -= petScore[_deadId];
         petScore[_deadId] = 0;
 
-        _getWalletSeedAndUpdateIfNeeded();
+        uint256 fee = getRandomFee();
+        
+        Entropy(entropyAddress).getWalletSeedAndUpdateIfNeeded{value:fee}();
 
         emit PetKilled(_deadId, petName[_deadId], pending, msg.sender);
     }
@@ -821,28 +829,6 @@ contract RaiGotchiV2 is QRNG, ERC721, Pausable {
         }
     }
 
-    function getWalletSeedAndUpdateIfNeeded()
-        external
-        isAuthorized
-        returns (uint256)
-    {
-        return _getWalletSeedAndUpdateIfNeeded();
-    }
-
-    function random(uint256 seed) private returns (uint) {
-        return
-            uint(
-                keccak256(
-                    abi.encodePacked(
-                        seed,
-                        block.prevrandao,
-                        block.timestamp,
-                        msg.sender,
-                        _getWalletSeedAndUpdateIfNeeded()
-                    )
-                )
-            );
-    }
 
     function _uint2str(
         uint256 _i

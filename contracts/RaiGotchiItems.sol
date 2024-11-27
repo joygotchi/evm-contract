@@ -287,7 +287,8 @@ contract RaiGotchiItems is ERC721, Ownable, Pausable {
         address _account,
         uint seed
     ) external isValid whenNotPaused returns (uint256 prototypeItemId) {
-        uint256 walletSeed = raiGotchiNFT.getWalletSeedAndUpdateIfNeeded();
+        uint256 fee = raiGotchiNFT.getRandomFee();
+        uint256 walletSeed = raiGotchiNFT.getWalletSeedAndUpdateIfNeeded{value:fee}();
 
         uint256 random = uint256(
             keccak256(

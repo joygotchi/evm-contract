@@ -119,7 +119,7 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
     }
 
     // Function to consume an item from the pet's bag
-    function consumeItem(uint256 nftId, uint256 itemId) external isApproved(nftId) whenNotPaused {
+    function consumeItem(uint256 nftId, uint256 itemId) external payable isApproved(nftId) whenNotPaused {
         require(raiGotchiNFT.isPetAlive(nftId), "Pet is dead");
         
         bool itemFound = false;
@@ -142,7 +142,8 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
             itemPoints[itemId]
         );
 
-        raiGotchiNFT.getWalletSeedAndUpdateIfNeeded();
+        uint256 fee = raiGotchiNFT.getRandomFee();
+        raiGotchiNFT.getWalletSeedAndUpdateIfNeeded{value:fee}();
         raiGotchiNFT.checkPetEvoleAndUpdateIfNeeded(nftId);
 
         emit ItemConsumed(nftId, msg.sender, itemId);
