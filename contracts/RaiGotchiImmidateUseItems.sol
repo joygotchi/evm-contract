@@ -120,7 +120,11 @@ contract RaiGotchiImmidiateUseItems is Ownable, Pausable {
 
     // Function to consume an item from the pet's bag
     function consumeItem(uint256 nftId, uint256 itemId) external isApproved(nftId) whenNotPaused {
-        require(raiGotchiNFT.isPetAlive(nftId), "Pet is dead");
+        require(
+            raiGotchiNFT.isPetAlive(nftId) ||
+                (!raiGotchiNFT.isPetAlive(nftId) && itemIsRevival[itemId]),
+            "Pet is dead or not a revival item"
+        );
         
         bool itemFound = false;
 

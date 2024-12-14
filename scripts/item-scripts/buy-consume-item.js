@@ -40,26 +40,26 @@ async function main() {
 
     // param1 : nftId
     // param2: itemId 
-    const txBuy = await raiGotchiImmidiateUseItems.buyImidiateUseItem(0, 1);
+    const txBuy = await raiGotchiImmidiateUseItems.buyImidiateUseItem(0, 3);
     await txBuy.wait();
     console.log(`Buy item successfully for pet 0`);
 
 
 
-    const txConsume = await raiGotchiImmidiateUseItems.consumeItem(0, 1);
+    const txConsume = await raiGotchiImmidiateUseItems.consumeItem(0, 3);
     await txConsume.wait();
     console.log("Done consume items for pet id 0");
 
 
-    const txBuy1 = await raiGotchiImmidiateUseItems.buyImidiateUseItem(1, 1);
-    await txBuy1.wait();
-    console.log(`Buy item successfully for pet 1`);
+    // const txBuy1 = await raiGotchiImmidiateUseItems.buyImidiateUseItem(1, 1);
+    // await txBuy1.wait();
+    // console.log(`Buy item successfully for pet 1`);
 
 
 
-    const txConsume1 = await raiGotchiImmidiateUseItems.consumeItem(1, 1);
-    await txConsume1.wait();
-    console.log("Done consume items for pet id 1");
+    // const txConsume1 = await raiGotchiImmidiateUseItems.consumeItem(1, 1);
+    // await txConsume1.wait();
+    // console.log("Done consume items for pet id 1");
     
   }
   
